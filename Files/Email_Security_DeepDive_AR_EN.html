@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Email Security Deep Dive — SPF · DKIM · Gateway · Headers</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=IBM+Plex+Mono:wght@300;400;500;600&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#020509;--s1:#060b14;--s2:#09101c;--card:#0b1522;--card2:#0e1928;
+  --border:#132030;--border2:#1c2e44;
+  --cyan:#00d4ff;--cyang:rgba(0,212,255,.07);
+  --green:#00ff88;--greeng:rgba(0,255,136,.06);
+  --red:#ff2d55;--redg:rgba(255,45,85,.08);
+  --orange:#ff8c00;--yellow:#ffd000;--purple:#b388ff;--pink:#ff4fa3;
+  --text:#d8e8f8;--muted:#4a6480;--muted2:#6a88a0;--muted3:#8aa8c0;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Cairo','Tajawal',sans-serif;background:var(--bg);color:var(--text);line-height:1.8;overflow-x:hidden;font-size:15px}
+
+/* ── GRID BG ── */
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(0,212,255,.015) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(0,212,255,.015) 1px,transparent 1px);
+  background-size:50px 50px;pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;top:-300px;left:50%;transform:translateX(-50%);
+  width:1000px;height:600px;
+  background:radial-gradient(ellipse,rgba(0,212,255,.05) 0%,transparent 65%);
+  pointer-events:none;z-index:0}
+
+/* ── LANG TOGGLE ── */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:300;
+  background:rgba(2,5,9,.97);backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;height:52px;padding:0 20px;gap:0}
+.tb-brand{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;
+  color:var(--cyan);letter-spacing:.1em;margin-inline-end:auto;white-space:nowrap}
+.tb-nav{display:flex;height:52px;list-style:none}
+.tb-nav a{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted2);
+  text-decoration:none;padding:0 13px;height:52px;display:flex;align-items:center;
+  border-inline-start:1px solid var(--border);letter-spacing:.05em;
+  transition:color .2s,background .2s;white-space:nowrap}
+.tb-nav a:hover{color:var(--cyan);background:var(--cyang)}
+.lang-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;padding:5px 13px;border:1px solid var(--border2);
+  background:transparent;color:var(--muted2);cursor:pointer;transition:all .2s;
+  border-inline-start:1px solid var(--border)}
+.lang-btn.active,.lang-btn:hover{color:var(--cyan);border-color:var(--cyan);background:var(--cyang)}
+@media(max-width:760px){.tb-nav{display:none}}
+
+/* ── LANG SWITCH ── */
+.ar{display:block}.en{display:none}
+.ar-i{display:inline}.en-i{display:none}
+body.en-mode .ar{display:none}
+body.en-mode .en{display:block}
+body.en-mode .ar-i{display:none}
+body.en-mode .en-i{display:inline}
+body.en-mode{direction:ltr}
+body.en-mode .topbar{direction:ltr}
+
+/* ── LAYOUT ── */
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px;position:relative;z-index:1}
+
+/* ── HERO ── */
+.hero{padding:100px 0 60px;position:relative;z-index:1;
+  border-bottom:1px solid var(--border)}
+.hero-chip{display:inline-flex;align-items:center;gap:8px;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--cyan);border:1px solid rgba(0,212,255,.3);padding:5px 14px;margin-bottom:24px}
+.hero-chip::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--cyan);
+  animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.6)}}
+.hero h1{font-size:clamp(2rem,5vw,3.8rem);font-weight:900;line-height:1.1;margin-bottom:14px}
+.hero h1 .c1{color:var(--cyan)}
+.hero h1 .c2{color:var(--green)}
+.hero h1 .c3{color:var(--orange)}
+.hero-sub{color:var(--muted2);font-size:15px;max-width:640px;margin-bottom:32px}
+.toc-pills{display:flex;flex-wrap:wrap;gap:6px}
+.toc-pill{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;
+  padding:5px 13px;border:1px solid var(--border2);color:var(--muted2);
+  text-decoration:none;transition:all .2s;cursor:pointer}
+.toc-pill:hover{border-color:var(--cyan);color:var(--cyan);background:var(--cyang)}
+
+/* ── SECTIONS ── */
+section{padding:68px 0;border-top:1px solid var(--border);position:relative;z-index:1}
+.sec-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--cyan);margin-bottom:10px;
+  display:flex;align-items:center;gap:10px}
+.sec-tag::before{content:'';width:24px;height:1px;background:var(--cyan)}
+h2{font-size:clamp(1.6rem,3vw,2.4rem);font-weight:900;line-height:1.2;margin-bottom:10px}
+.sec-desc{color:var(--muted2);font-size:14.5px;max-width:720px;margin-bottom:36px}
+h3{font-family:'Cairo',sans-serif;font-weight:800;font-size:1.1rem;color:var(--text);
+  margin-top:28px;margin-bottom:10px}
+p{color:#90aac0;font-size:14.5px;margin-bottom:14px;line-height:1.8}
+
+/* ── BILINGUAL SIDE-BY-SIDE ── */
+.biblock{display:grid;grid-template-columns:1fr 1fr;gap:0;
+  border:1px solid var(--border);margin:24px 0;overflow:hidden}
+.bb-ar{background:var(--card);padding:24px 26px;border-inline-end:1px solid var(--border);
+  direction:rtl;font-family:'Cairo',sans-serif}
+.bb-en{background:var(--card2);padding:24px 26px;direction:ltr;
+  font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:1.75}
+.bb-lang{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--cyan);margin-bottom:10px;display:block}
+.bb-ar p,.bb-en p{font-size:13px;color:var(--muted2);margin-bottom:8px}
+.bb-ar h4,.bb-en h4{font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px}
+@media(max-width:680px){.biblock{grid-template-columns:1fr}
+  .bb-ar{border-inline-end:none;border-bottom:1px solid var(--border)}}
+
+/* ── DIAGRAM CONTAINER ── */
+.diagram-wrap{background:var(--s1);border:1px solid var(--border);
+  padding:28px;margin:28px 0;overflow-x:auto}
+.diagram-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--cyan);margin-bottom:20px;
+  display:flex;align-items:center;gap:8px}
+.diagram-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── CODE BLOCK ── */
+.code-block{background:#030810;border:1px solid var(--border);
+  border-left:3px solid var(--cyan);padding:18px 20px;margin:16px 0;
+  font-family:'IBM Plex Mono',monospace;font-size:12px;
+  overflow-x:auto;line-height:1.85;position:relative}
+.code-block .cb-tag{font-size:9px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--cyan);margin-bottom:8px;display:block}
+.ck{color:#a8c8e8}.cv{color:var(--green)}.cc{color:var(--muted2)}.ch{color:var(--yellow)}
+.ce{color:var(--red)}.ci{color:var(--cyan)}.cp{color:var(--purple)}
+
+/* ── TABLES ── */
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin:18px 0}
+.tbl th{background:#060d18;font-family:'IBM Plex Mono',monospace;font-size:9.5px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--cyan);
+  padding:10px 14px;text-align:right;border:1px solid var(--border)}
+body.en-mode .tbl th{text-align:left}
+.tbl td{padding:10px 14px;border:1px solid var(--border);
+  color:var(--muted2);vertical-align:top;line-height:1.6}
+.tbl tr:hover td{background:rgba(0,212,255,.02)}
+.tbl td strong{color:var(--text)}
+
+/* ── STEP BLOCKS ── */
+.steps{margin:24px 0;counter-reset:st}
+.step{display:flex;gap:16px;padding:18px 0;border-bottom:1px solid var(--border);
+  counter-increment:st}
+.step:last-child{border-bottom:none}
+.sn{flex-shrink:0;width:36px;height:36px;border:1px solid rgba(0,212,255,.3);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--cyan);margin-top:2px}
+.sn::before{content:counter(st,decimal-leading-zero)}
+.sb h4{font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:5px}
+.sb p{font-size:13px;color:var(--muted2);margin:0}
+
+/* ── INFO NOTE ── */
+.note{background:rgba(0,212,255,.04);border-right:3px solid var(--cyan);
+  padding:14px 18px;margin:18px 0;font-size:13px;color:var(--muted2)}
+body.en-mode .note{border-right:none;border-left:3px solid var(--cyan)}
+.note strong{color:var(--cyan);display:block;font-family:'IBM Plex Mono',monospace;
+  font-size:9px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:5px}
+.note.warn{border-right-color:var(--red);background:var(--redg)}
+body.en-mode .note.warn{border-left-color:var(--red);border-right:none}
+.note.warn strong{color:var(--red)}
+.note.tip{border-right-color:var(--green);background:var(--greeng)}
+body.en-mode .note.tip{border-left-color:var(--green);border-right:none}
+.note.tip strong{color:var(--green)}
+
+/* ── BADGE ── */
+.badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;
+  padding:3px 10px;border-radius:1px;font-weight:500;letter-spacing:.04em}
+.b-c{background:rgba(0,212,255,.1);color:var(--cyan);border:1px solid rgba(0,212,255,.25)}
+.b-g{background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.25)}
+.b-r{background:rgba(255,45,85,.1);color:var(--red);border:1px solid rgba(255,45,85,.25)}
+.b-o{background:rgba(255,140,0,.1);color:var(--orange);border:1px solid rgba(255,140,0,.25)}
+.b-y{background:rgba(255,208,0,.1);color:var(--yellow);border:1px solid rgba(255,208,0,.25)}
+.b-p{background:rgba(179,136,255,.1);color:var(--purple);border:1px solid rgba(179,136,255,.25)}
+
+/* ── CARDS GRID ── */
+.cg{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:1px;background:var(--border);border:1px solid var(--border);margin:24px 0}
+.ccard{background:var(--card);padding:22px;transition:background .2s}
+.ccard:hover{background:#0d1930}
+.ccard .cc-icon{font-size:1.6rem;margin-bottom:10px;line-height:1}
+.ccard .cc-title{font-size:14px;font-weight:800;color:var(--text);margin-bottom:6px}
+.ccard .cc-en{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--muted);
+  letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.ccard p{font-size:12.5px;color:var(--muted2);margin:0}
+
+/* ── HEADER ANALYZER ── */
+.header-panel{background:var(--s1);border:1px solid var(--border);margin:24px 0}
+.hp-tabs{display:flex;border-bottom:1px solid var(--border)}
+.hp-tab{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;padding:10px 18px;cursor:pointer;
+  color:var(--muted2);border-bottom:2px solid transparent;transition:all .2s}
+.hp-tab.active{color:var(--cyan);border-bottom-color:var(--cyan);background:var(--cyang)}
+.hp-tab:hover{color:var(--cyan)}
+.hp-content{padding:22px;display:none}
+.hp-content.active{display:block}
+
+/* ── HIGHLIGHT FIELDS ── */
+.hf{font-family:'IBM Plex Mono',monospace;font-size:11.5px;
+  background:#030810;border:1px solid var(--border);
+  padding:12px 16px;margin:8px 0;line-height:1.9;overflow-x:auto}
+.hf-key{color:var(--cyan)}
+.hf-val{color:var(--green)}
+.hf-sus{color:var(--red)}
+.hf-warn{color:var(--orange)}
+.hf-ok{color:var(--green)}
+.hf-info{color:var(--yellow)}
+.hf-note{font-size:10px;color:var(--muted);margin-right:8px}
+
+/* ── TWO COL ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:20px 0}
+@media(max-width:640px){.two-col{grid-template-columns:1fr}}
+
+/* ── FLOW DIAGRAM CSS ── */
+.flow-box{background:var(--card);border:1px solid var(--border2);
+  padding:10px 14px;font-family:'IBM Plex Mono',monospace;font-size:11px;
+  color:var(--text);text-align:center;position:relative;min-width:110px}
+.flow-arrow{color:var(--cyan);font-size:1.2rem;text-align:center;
+  font-family:'IBM Plex Mono',monospace;line-height:1;padding:4px 0}
+.flow-label{font-size:10px;color:var(--muted2);text-align:center;
+  font-family:'IBM Plex Mono',monospace}
+
+/* ── DIVIDER ── */
+hr{border:none;border-top:1px solid var(--border);margin:28px 0}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);padding:28px 0;position:relative;z-index:1}
+.foot-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.foot-brand{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--cyan);letter-spacing:.08em}
+.foot-copy{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)}
+
+/* ── REVEAL ── */
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s ease}
+.reveal.vis{opacity:1;transform:none}
+
+/* ── SCROLL INDICATOR ── */
+.scroll-progress{position:fixed;top:52px;left:0;right:0;height:2px;z-index:250;
+  background:var(--border)}
+.scroll-bar{height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));
+  width:0%;transition:width .1s}
+</style>
+</head>
+<body>
+
+<!-- SCROLL PROGRESS -->
+<div class="scroll-progress"><div class="scroll-bar" id="sbar"></div></div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="tb-brand">
+    <span class="ar-i">أمن البريد الإلكتروني</span>
+    <span class="en-i">Email Security Deep Dive</span>
+  </div>
+  <ul class="tb-nav">
+    <li><a href="#spf"><span class="ar-i">SPF</span><span class="en-i">SPF</span></a></li>
+    <li><a href="#dkim">DKIM</a></li>
+    <li><a href="#dmarc">DMARC</a></li>
+    <li><a href="#gateway"><span class="ar-i">البوابة</span><span class="en-i">Gateway</span></a></li>
+    <li><a href="#artifacts"><span class="ar-i">الآثار</span><span class="en-i">Artifacts</span></a></li>
+    <li><a href="#headers"><span class="ar-i">التحليل</span><span class="en-i">Analysis</span></a></li>
+  </ul>
+  <button class="lang-btn active" id="btn-ar" onclick="setLang('ar')">العربية</button>
+  <button class="lang-btn" id="btn-en" onclick="setLang('en')">English</button>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+<div class="wrap">
+  <div class="hero-chip">DFIR · SOC · Email Security — Deep Dive</div>
+  <h1>
+    <span class="ar"><span class="c1">SPF</span> · <span class="c2">DKIM</span> · <span class="c3">DMARC</span><br>أمن البريد الإلكتروني</span>
+    <span class="en" style="display:none"><span class="c1">SPF</span> · <span class="c2">DKIM</span> · <span class="c3">DMARC</span><br>Email Security Deep Dive</span>
+  </h1>
+  <p class="hero-sub ar">دليل شامل وعميق: كيف يعمل SPF وDKIM وDMARC، بوابة أمن البريد، جمع الآثار الجنائية، وتحليل ترويسات وأجسام الرسائل</p>
+  <p class="hero-sub en" style="display:none">Complete deep-dive: How SPF, DKIM & DMARC work, Mail Security Gateway internals, forensic artifact collection, and full email header/body analysis</p>
+  <div class="toc-pills">
+    <a class="toc-pill" href="#spf">01 · SPF</a>
+    <a class="toc-pill" href="#dkim">02 · DKIM</a>
+    <a class="toc-pill" href="#dmarc">03 · DMARC</a>
+    <a class="toc-pill" href="#gateway">04 · <span class="ar-i">بوابة الأمان</span><span class="en-i">Security Gateway</span></a>
+    <a class="toc-pill" href="#artifacts">05 · <span class="ar-i">جمع الآثار</span><span class="en-i">Artifact Collection</span></a>
+    <a class="toc-pill" href="#headers">06 · <span class="ar-i">تحليل الترويسات</span><span class="en-i">Header Analysis</span></a>
+    <a class="toc-pill" href="#body">07 · <span class="ar-i">تحليل الجسم</span><span class="en-i">Body Analysis</span></a>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 1 — SPF
+═══════════════════════════════════════ -->
+<section id="spf">
+<div class="wrap reveal">
+  <div class="sec-tag">01 — <span class="ar-i">إطار سياسة المُرسِل</span><span class="en-i">Sender Policy Framework</span></div>
+  <h2 class="ar">SPF — Sender Policy Framework</h2>
+  <h2 class="en" style="display:none">SPF — Sender Policy Framework</h2>
+  <p class="sec-desc ar">SPF هو بروتوكول مصادقة يُحدد أي خوادم البريد مسموح لها بإرسال رسائل بريد إلكتروني باسم نطاق معين. يعمل عبر سجلات DNS ويمنع انتحال عناوين المُرسِل.</p>
+  <p class="sec-desc en" style="display:none">SPF is an email authentication protocol that specifies which mail servers are authorized to send email on behalf of a domain. It works via DNS records and prevents sender address spoofing.</p>
+
+  <!-- WHAT IS SPF -->
+  <div class="biblock">
+    <div class="bb-ar">
+      <span class="bb-lang">Arabic / العربية</span>
+      <h4>ما هو SPF بالضبط؟</h4>
+      <p>SPF (Sender Policy Framework) هو معيار مُعرَّف في RFC 7208. يعمل كـ "قائمة بيضاء" في DNS تُخبر خوادم البريد المستقبِلة: "هذه الخوادم فقط مسموح لها بإرسال البريد من نطاقي".</p>
+      <p>عندما يستقبل خادم بريد رسالة، يسأل: "هل عنوان IP الذي أرسل هذه الرسالة موجود في سجل SPF لنطاق المُرسِل؟" إذا لم يكن — قد ترفض الرسالة أو تُصنَّف كإسبام.</p>
+      <p><strong>المشكلة التي يحلها:</strong> أي شخص يمكنه تقنياً إرسال بريد بعنوان مُرسِل مزيف (spoofed). SPF يجعل ذلك قابلاً للاكتشاف.</p>
+    </div>
+    <div class="bb-en">
+      <span class="bb-lang">English</span>
+      <h4>What exactly is SPF?</h4>
+      <p>SPF (Sender Policy Framework) is a standard defined in RFC 7208. It acts as a DNS-based "whitelist" telling receiving mail servers: "Only these servers are allowed to send mail from my domain".</p>
+      <p>When a mail server receives a message, it asks: "Is the IP address that sent this message listed in the sender domain's SPF record?" If not — the message may be rejected or spam-classified.</p>
+      <p><strong>Problem it solves:</strong> Anyone can technically send email with a forged sender address. SPF makes this detectable.</p>
+    </div>
+  </div>
+
+  <!-- SPF DNS RECORD ANATOMY -->
+  <h3 class="ar">تشريح سجل SPF في DNS</h3>
+  <h3 class="en" style="display:none">Anatomy of an SPF DNS Record</h3>
+
+  <div class="code-block">
+    <span class="cb-tag">DNS TXT Record — example.com</span>
+    <span class="ck">example.com</span> <span class="cv">IN TXT</span> <span class="ch">"</span><span class="ci">v=spf1</span> <span class="cv">ip4:203.0.113.10</span> <span class="cv">ip4:198.51.100.0/24</span> <span class="cp">include:_spf.google.com</span> <span class="cp">include:spf.protection.outlook.com</span> <span class="ce">-all</span><span class="ch">"</span>
+  </div>
+
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th><span class="ar-i">الجزء</span><span class="en-i">Part</span></th>
+        <th><span class="ar-i">القيمة</span><span class="en-i">Value</span></th>
+        <th><span class="ar-i">المعنى</span><span class="en-i">Meaning</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><strong class="ck">v=spf1</strong></td><td><span class="ar-i">الإصدار</span><span class="en-i">Version</span></td><td><span class="ar-i">إلزامي — يُعرّف هذا كسجل SPF. spf1 هو الإصدار الوحيد الموجود حالياً</span><span class="en-i">Mandatory — identifies this as an SPF record. spf1 is the only current version</span></td></tr>
+      <tr><td><strong class="cv">ip4:</strong></td><td><span class="ar-i">عنوان IPv4 محدد</span><span class="en-i">Specific IPv4</span></td><td><span class="ar-i">يُصرّح بعنوان IP واحد أو نطاق CIDR مُحدد</span><span class="en-i">Authorizes a single IP or CIDR range</span></td></tr>
+      <tr><td><strong class="cv">ip6:</strong></td><td><span class="ar-i">عنوان IPv6</span><span class="en-i">IPv6 address</span></td><td><span class="ar-i">نفس ip4 ولكن لعناوين IPv6</span><span class="en-i">Same as ip4 but for IPv6 addresses</span></td></tr>
+      <tr><td><strong class="cp">include:</strong></td><td><span class="ar-i">نطاق خارجي</span><span class="en-i">External domain</span></td><td><span class="ar-i">يُدمج سجل SPF نطاق آخر (مثل Google Workspace، Microsoft 365)</span><span class="en-i">Imports another domain's SPF (e.g. Google Workspace, Microsoft 365)</span></td></tr>
+      <tr><td><strong>a</strong></td><td><span class="ar-i">سجل A للنطاق</span><span class="en-i">Domain's A record</span></td><td><span class="ar-i">يُصرّح بعنوان IP المرتبط بسجل A للنطاق نفسه</span><span class="en-i">Authorizes the IP in the domain's own A record</span></td></tr>
+      <tr><td><strong>mx</strong></td><td><span class="ar-i">خوادم MX للنطاق</span><span class="en-i">Domain's MX servers</span></td><td><span class="ar-i">يُصرّح بجميع خوادم MX المدرجة في DNS للنطاق</span><span class="en-i">Authorizes all MX servers listed in the domain's DNS</span></td></tr>
+      <tr><td><strong class="ce">-all</strong></td><td><span class="ar-i">رفض كل ما عداه (Fail)</span><span class="en-i">Hard Fail all others</span></td><td><span class="ar-i">أي مُرسِل غير مذكور = فشل قاطع. يُرفض البريد</span><span class="en-i">Any unlisted sender = hard fail. Mail is rejected</span></td></tr>
+      <tr><td><strong class="ch">~all</strong></td><td><span class="ar-i">فشل ناعم (SoftFail)</span><span class="en-i">Soft Fail</span></td><td><span class="ar-i">غير مُصرَّح لكن اقبل + ضع علامة. يُستخدم أثناء الانتقال</span><span class="en-i">Unauthorized but accept & mark. Used during transition</span></td></tr>
+      <tr><td><strong>?all</strong></td><td><span class="ar-i">محايد (Neutral)</span><span class="en-i">Neutral</span></td><td><span class="ar-i">لا رأي — لا يُوصى به للإنتاج</span><span class="en-i">No opinion — not recommended for production</span></td></tr>
+      <tr><td><strong>+all</strong></td><td><span class="ar-i">السماح للجميع (خطير!)</span><span class="en-i">Pass all (DANGEROUS!)</span></td><td><span class="ar-i">⚠ يُصرّح لأي خادم بالإرسال — يُبطل SPF كلياً</span><span class="en-i">⚠ Authorizes ANY server — completely defeats SPF</span></td></tr>
+    </tbody>
+  </table>
+
+  <!-- SPF FLOW DIAGRAM SVG -->
+  <div class="diagram-wrap">
+    <div class="diagram-title"><span class="ar-i">كيف يعمل SPF — تدفق التحقق</span><span class="en-i">How SPF Works — Verification Flow</span></div>
+    <svg viewBox="0 0 900 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:900px;display:block;margin:0 auto">
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0,8 3,0 6" fill="#00d4ff"/>
+        </marker>
+        <marker id="arr-r" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0,8 3,0 6" fill="#ff2d55"/>
+        </marker>
+        <marker id="arr-g" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0,8 3,0 6" fill="#00ff88"/>
+        </marker>
+        <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+
+      <!-- Sender -->
+      <rect x="20" y="130" width="120" height="60" rx="3" fill="#0b1522" stroke="#1c2e44"/>
+      <text x="80" y="155" text-anchor="middle" fill="#00d4ff" font-family="IBM Plex Mono" font-size="10">SENDER</text>
+      <text x="80" y="170" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="9">attacker.net</text>
+      <text x="80" y="183" text-anchor="middle" fill="#ff2d55" font-family="IBM Plex Mono" font-size="8">FROM:ceo@bank.com</text>
+
+      <!-- Arrow 1 -->
+      <line x1="140" y1="160" x2="205" y2="160" stroke="#00d4ff" stroke-width="1.5" marker-end="url(#arr)"/>
+      <text x="172" y="152" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">SMTP</text>
+
+      <!-- Receiving Mail Server -->
+      <rect x="205" y="110" width="140" height="100" rx="3" fill="#0b1522" stroke="#1c2e44"/>
+      <text x="275" y="135" text-anchor="middle" fill="#d8e8f8" font-family="IBM Plex Mono" font-size="10" font-weight="bold">RECEIVING</text>
+      <text x="275" y="150" text-anchor="middle" fill="#d8e8f8" font-family="IBM Plex Mono" font-size="10">MAIL SERVER</text>
+      <text x="275" y="170" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="9">mail.victim.com</text>
+      <text x="275" y="185" text-anchor="middle" fill="#ffcc00" font-family="IBM Plex Mono" font-size="8">Checking SPF...</text>
+      <text x="275" y="200" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">Sender IP: 44.33.22.11</text>
+
+      <!-- Arrow DNS query -->
+      <line x1="345" y1="145" x2="430" y2="100" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+      <text x="400" y="115" text-anchor="middle" fill="#00d4ff" font-family="IBM Plex Mono" font-size="8">DNS TXT Query</text>
+      <text x="400" y="126" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">bank.com SPF?</text>
+
+      <!-- DNS Server -->
+      <rect x="430" y="40" width="150" height="80" rx="3" fill="#060b14" stroke="#132030"/>
+      <text x="505" y="62" text-anchor="middle" fill="#b388ff" font-family="IBM Plex Mono" font-size="10">DNS SERVER</text>
+      <text x="505" y="78" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">bank.com TXT:</text>
+      <text x="505" y="91" text-anchor="middle" fill="#00ff88" font-family="IBM Plex Mono" font-size="8">v=spf1 ip4:50.60.70.0/24</text>
+      <text x="505" y="104" text-anchor="middle" fill="#00ff88" font-family="IBM Plex Mono" font-size="8">include:mail.bank.com -all</text>
+
+      <!-- Arrow DNS response -->
+      <line x1="430" y1="95" x2="365" y2="148" stroke="#b388ff" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+      <text x="380" y="132" text-anchor="middle" fill="#b388ff" font-family="IBM Plex Mono" font-size="8">SPF Record</text>
+
+      <!-- SPF Check Box -->
+      <rect x="430" y="170" width="180" height="80" rx="3" fill="#0b1522" stroke="#ff2d55"/>
+      <text x="520" y="192" text-anchor="middle" fill="#ff2d55" font-family="IBM Plex Mono" font-size="10" font-weight="bold">SPF CHECK</text>
+      <text x="520" y="208" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">Sender IP: 44.33.22.11</text>
+      <text x="520" y="221" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">Allowed: 50.60.70.0/24</text>
+      <text x="520" y="237" text-anchor="middle" fill="#ff2d55" font-family="IBM Plex Mono" font-size="9" font-weight="bold">44.33.22.11 ∉ SPF ❌</text>
+
+      <!-- Arrow to check -->
+      <line x1="345" y1="175" x2="428" y2="205" stroke="#00d4ff" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- FAIL result -->
+      <rect x="640" y="155" width="130" height="50" rx="3" fill="#1a0810" stroke="#ff2d55"/>
+      <text x="705" y="177" text-anchor="middle" fill="#ff2d55" font-family="IBM Plex Mono" font-size="11" font-weight="bold" filter="url(#glow)">SPF FAIL ❌</text>
+      <text x="705" y="193" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">Reject / Spam</text>
+      <line x1="610" y1="210" x2="638" y2="185" stroke="#ff2d55" stroke-width="1.5" marker-end="url(#arr-r)"/>
+
+      <!-- PASS path (below) -->
+      <rect x="20" y="250" width="120" height="55" rx="3" fill="#0b1522" stroke="#1c2e44"/>
+      <text x="80" y="272" text-anchor="middle" fill="#00d4ff" font-family="IBM Plex Mono" font-size="10">SENDER</text>
+      <text x="80" y="287" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="9">50.60.70.5</text>
+      <text x="80" y="298" text-anchor="middle" fill="#00ff88" font-family="IBM Plex Mono" font-size="8">FROM:ceo@bank.com</text>
+
+      <line x1="140" y1="277" x2="205" y2="250" stroke="#00ff88" stroke-width="1.5" marker-end="url(#arr-g)"/>
+
+      <rect x="640" y="250" width="130" height="50" rx="3" fill="#081a10" stroke="#00ff88"/>
+      <text x="705" y="272" text-anchor="middle" fill="#00ff88" font-family="IBM Plex Mono" font-size="11" font-weight="bold" filter="url(#glow)">SPF PASS ✓</text>
+      <text x="705" y="288" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">Deliver Email</text>
+      <line x1="345" y1="250" x2="638" y2="270" stroke="#00ff88" stroke-width="1.5" marker-end="url(#arr-g)"/>
+
+      <!-- Labels -->
+      <text x="450" y="330" text-anchor="middle" fill="#1c2e44" font-family="IBM Plex Mono" font-size="9">─── Legitimate Sender Path ───</text>
+    </svg>
+  </div>
+
+  <div class="note warn">
+    <strong>⚠ SPF Limitation — يقتصر على Envelope From</strong>
+    <span class="ar">SPF يتحقق فقط من عنوان MAIL FROM في بروتوكول SMTP (envelope sender)، وليس من عنوان "From:" الذي يراه المستخدم في برنامج البريد! لهذا يمكن للمهاجم اجتياز SPF بينما يُظهر عنواناً مزيفاً للمستخدم — وهذا ما يُعرف بهجوم Header From Spoofing.</span>
+    <span class="en" style="display:none">SPF only checks the SMTP MAIL FROM (envelope sender), NOT the "From:" header the user sees in their mail client! This means an attacker can pass SPF while showing a forged From address to the user — known as Header From Spoofing.</span>
+  </div>
+
+  <!-- SPF RECORDS EXAMPLES -->
+  <h3 class="ar">أمثلة سجلات SPF حقيقية</h3>
+  <h3 class="en" style="display:none">Real-World SPF Record Examples</h3>
+
+  <div class="code-block">
+    <span class="cb-tag">Example 1 — Small Company (Tight Policy)</span>
+    <span class="ck">smallco.com</span> <span class="cv">IN TXT</span> <span class="ch">"v=spf1 ip4:192.0.2.100 -all"</span>
+    <span class="cc">// فقط IP واحد مُصرَّح به + رفض قاطع</span>
+  </div>
+
+  <div class="code-block">
+    <span class="cb-tag">Example 2 — Google Workspace + Backup SMTP</span>
+    <span class="ck">company.com</span> <span class="cv">IN TXT</span> <span class="ch">"v=spf1 include:_spf.google.com ip4:203.0.113.50 ~all"</span>
+    <span class="cc">// Google Workspace مع خادم احتياطي + SoftFail</span>
+  </div>
+
+  <div class="code-block">
+    <span class="cb-tag">Example 3 — Enterprise (Microsoft 365 + Salesforce + Mailchimp)</span>
+    <span class="ck">enterprise.com</span> <span class="cv">IN TXT</span> <span class="ch">"v=spf1</span>
+      <span class="cp">include:spf.protection.outlook.com</span>
+      <span class="cp">include:_spf.salesforce.com</span>
+      <span class="cp">include:servers.mcsv.net</span>
+      <span class="cv">ip4:198.51.100.0/28</span>
+      <span class="ce">-all"</span>
+    <span class="cc">// ⚠ تحذير: كل include: يُضيف lookup — الحد الأقصى 10 DNS lookups</span>
+  </div>
+
+  <div class="note">
+    <strong>🔢 SPF DNS Lookup Limit — حد استعلامات DNS</strong>
+    <span class="ar">SPF يسمح بـ 10 استعلامات DNS فقط لتفسير السجل الواحد. كل include:, a, mx, exists, redirect يُحسب كاستعلام. تجاوز الحد = SPF PermError = يُعامَل كـ None أو Fail.</span>
+    <span class="en" style="display:none">SPF allows only 10 DNS lookups to resolve one record. Every include:, a, mx, exists, redirect counts as a lookup. Exceeding the limit = SPF PermError = treated as None or Fail.</span>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SECTION 2 — DKIM
+═══════════════════════════════════════ -->
+<section id="dkim">
+<div class="wrap reveal">
+  <div class="sec-tag">02 — <span class="ar-i">البريد المُعرَّف بمفاتيح النطاق</span><span class="en-i">DomainKeys Identified Mail</span></div>
+  <h2>DKIM — DomainKeys Identified Mail</h2>
+  <p class="sec-desc ar">DKIM يُضيف توقيعاً رقمياً مشفراً لكل بريد إلكتروني صادر، مما يسمح لخادم الاستقبال بالتحقق من أن الرسالة أُرسِلت فعلاً من النطاق المُدّعى وأن محتواها لم يُعدَّل أثناء الإرسال.</p>
+  <p class="sec-desc en" style="display:none">DKIM adds a cryptographic digital signature to every outgoing email, allowing the receiving server to verify that the message was genuinely sent from the claimed domain and that its content was not modified in transit.</p>
+
+  <div class="biblock">
+    <div class="bb-ar">
+      <span class="bb-lang">Arabic / كيف يعمل DKIM</span>
+      <h4>مبدأ عمل DKIM — التشفير غير المتماثل</h4>
+      <p>DKIM يستخدم زوج مفاتيح RSA أو Ed25519: <strong>المفتاح الخاص</strong> (Private Key) محفوظ بشكل آمن على خادم البريد الصادر، ويُستخدم لإنشاء التوقيع. <strong>المفتاح العام</strong> (Public Key) منشور في DNS ليتمكن أي خادم استقبال من التحقق.</p>
+      <p>الخادم الصادر يحسب "بصمة رقمية" (hash) لأجزاء محددة من الرسالة (headers + body)، ثم يُشفرها بالمفتاح الخاص، ويضع التوقيع في header خاص اسمه DKIM-Signature.</p>
+      <p>الخادم المستقبِل يُحمّل المفتاح العام من DNS، يُفك تشفير التوقيع، ويقارن الـ hash. تطابق = لم تُعدَّل + صادرة فعلاً من النطاق المُدّعى.</p>
+    </div>
+    <div class="bb-en">
+      <span class="bb-lang">English — How DKIM Works</span>
+      <h4>DKIM Principle — Asymmetric Cryptography</h4>
+      <p>DKIM uses an RSA or Ed25519 key pair: the <strong>Private Key</strong> is stored securely on the outgoing mail server and used to create the signature. The <strong>Public Key</strong> is published in DNS so any receiving server can verify.</p>
+      <p>The outgoing server computes a cryptographic hash of specific message parts (selected headers + body), encrypts it with the private key, and places the signature in a special header called DKIM-Signature.</p>
+      <p>The receiving server fetches the public key from DNS, decrypts the signature, and compares the hash. Match = not tampered + genuinely from the claimed domain.</p>
+    </div>
+  </div>
+
+  <!-- DKIM SIGNATURE ANATOMY -->
+  <h3 class="ar">تشريح توقيع DKIM</h3>
+  <h3 class="en" style="display:none">DKIM Signature Anatomy</h3>
+
+  <div class="code-block">
+    <span class="cb-tag">Real DKIM-Signature Header</span>
+    <span class="ck">DKIM-Signature:</span> <span class="cv">v=1</span>; <span class="cv">a=rsa-sha256</span>; <span class="cv">c=relaxed/relaxed</span>;
+      <span class="cv">d=example.com</span>; <span class="cv">s=selector1</span>;
+      <span class="cv">h=From:To:Subject:Date:Message-ID:MIME-Version:Content-Type</span>;
+      <span class="cv">bh=7Xm+YHCVS3xOVYHXNuKyXrFf8vkHl9Q...</span><span class="cc">  (body hash)</span>
+      <span class="cv">b=W9P4Rfk2N+KkLp9wOxBwFeGxHBqCz...</span><span class="cc">   (signature)</span>
+  </div>
+
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th><span class="ar-i">الحقل</span><span class="en-i">Tag</span></th>
+        <th><span class="ar-i">المعنى</span><span class="en-i">Meaning</span></th>
+        <th><span class="ar-i">ملاحظات تحليلية</span><span class="en-i">Analysis Notes</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><strong class="ck">v=1</strong></td><td><span class="ar-i">الإصدار</span><span class="en-i">Version</span></td><td><span class="ar-i">دائماً 1 — الإصدار الوحيد</span><span class="en-i">Always 1 — only version</span></td></tr>
+      <tr><td><strong class="cv">a=rsa-sha256</strong></td><td><span class="ar-i">خوارزمية التوقيع</span><span class="en-i">Signing Algorithm</span></td><td><span class="ar-i">rsa-sha256 هو المعيار. rsa-sha1 قديم وضعيف. ed25519-sha256 أحدث وأفضل</span><span class="en-i">rsa-sha256 is standard. rsa-sha1 deprecated/weak. ed25519-sha256 is newer/stronger</span></td></tr>
+      <tr><td><strong class="cv">c=relaxed/relaxed</strong></td><td><span class="ar-i">خوارزمية التطبيع</span><span class="en-i">Canonicalization</span></td><td><span class="ar-i">relaxed: يتسامح مع تغييرات whitespace. simple: صارم. الأول قبل الشرطة للـ header، الثاني للـ body</span><span class="en-i">relaxed tolerates whitespace changes. simple is strict. First=header, second=body</span></td></tr>
+      <tr><td><strong class="cv">d=example.com</strong></td><td><span class="ar-i">النطاق الموقِّع</span><span class="en-i">Signing Domain</span></td><td><span class="ar-i">⚠ يجب مقارنته بـ From: — إذا اختلفا قد يكون هجوماً</span><span class="en-i">⚠ Must be compared to From: — mismatch may indicate attack</span></td></tr>
+      <tr><td><strong class="cv">s=selector1</strong></td><td><span class="ar-i">المُحدِّد (Selector)</span><span class="en-i">Key Selector</span></td><td><span class="ar-i">يُحدد أي مفتاح عام في DNS. يُسمح بمفاتيح متعددة للتدوير الآمن</span><span class="en-i">Specifies which public key in DNS. Multiple selectors allow safe key rotation</span></td></tr>
+      <tr><td><strong class="cv">h=From:To:...</strong></td><td><span class="ar-i">قائمة الـ Headers الموقَّعة</span><span class="en-i">Signed Headers List</span></td><td><span class="ar-i">⚠ Headers غير مدرجة هنا يمكن تعديلها بدون كسر DKIM — وهو هجوم Header Injection</span><span class="en-i">⚠ Headers not listed here can be modified without breaking DKIM — Header Injection attack</span></td></tr>
+      <tr><td><strong class="cv">bh=...</strong></td><td><span class="ar-i">hash جسم الرسالة</span><span class="en-i">Body Hash</span></td><td><span class="ar-i">Base64 لـ SHA-256 hash لجسم الرسالة. يضمن عدم تعديل المحتوى</span><span class="en-i">Base64 of SHA-256 hash of message body. Ensures content integrity</span></td></tr>
+      <tr><td><strong class="cv">b=...</strong></td><td><span class="ar-i">التوقيع الرقمي</span><span class="en-i">Digital Signature</span></td><td><span class="ar-i">التوقيع الفعلي — مُشفَّر بالمفتاح الخاص. يُفك تشفيره بالمفتاح العام من DNS</span><span class="en-i">The actual signature — encrypted with private key. Decrypted by DNS public key</span></td></tr>
+      <tr><td><strong>t=</strong></td><td><span class="ar-i">وقت التوقيع (Unix timestamp)</span><span class="en-i">Signature Timestamp</span></td><td><span class="ar-i">وقت إنشاء التوقيع. مفيد في الاستجابة للحوادث</span><span class="en-i">Time signature was created. Useful in incident response</span></td></tr>
+      <tr><td><strong>x=</strong></td><td><span class="ar-i">وقت انتهاء الصلاحية</span><span class="en-i">Expiration Timestamp</span></td><td><span class="ar-i">التوقيع غير صالح بعد هذا الوقت (اختياري)</span><span class="en-i">Signature invalid after this time (optional)</span></td></tr>
+    </tbody>
+  </table>
+
+  <!-- DNS DKIM Record -->
+  <h3 class="ar">سجل المفتاح العام في DNS</h3>
+  <h3 class="en" style="display:none">DKIM Public Key DNS Record</h3>
+
+  <div class="code-block">
+    <span class="cb-tag">DNS TXT — DKIM Public Key Location</span>
+    <span class="cc">// صيغة استعلام المفتاح: {selector}._domainkey.{domain}</span>
+    <span class="ck">selector1._domainkey.example.com</span> <span class="cv">IN TXT</span>
+    <span class="ch">"v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC5N3..."</span>
+
+    <span class="cc">// v=DKIM1 → نسخة البروتوكول</span>
+    <span class="cc">// k=rsa  → نوع المفتاح (rsa أو ed25519)</span>
+    <span class="cc">// p=...  → المفتاح العام بترميز Base64</span>
+    <span class="cc">// إذا كان p= فارغاً = المفتاح مُلغى (revoked)</span>
+  </div>
+
+  <!-- DKIM FLOW SVG -->
+  <div class="diagram-wrap">
+    <div class="diagram-title"><span class="ar-i">تدفق DKIM — التوقيع والتحقق</span><span class="en-i">DKIM Flow — Signing & Verification</span></div>
+    <svg viewBox="0 0 920 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:920px;display:block;margin:0 auto">
+      <defs>
+        <marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#00d4ff"/></marker>
+        <marker id="a2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#00ff88"/></marker>
+        <marker id="a3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#b388ff"/></marker>
+        <marker id="a4" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#ff8c00"/></marker>
+      </defs>
+
+      <!-- SENDING SIDE -->
+      <rect x="10" y="20" width="180" height="360" rx="4" fill="#060b14" stroke="#132030"/>
+      <text x="100" y="42" text-anchor="middle" fill="#00d4ff" font-family="IBM Plex Mono" font-size="10" font-weight="bold">SENDING SERVER</text>
+
+      <rect x="25" y="55" width="150" height="65" rx="3" fill="#0b1522" stroke="#1c2e44"/>
+      <text x="100" y="73" text-anchor="middle" fill="#d8e8f8" font-family="IBM Plex Mono" font-size="9" font-weight="bold">EMAIL MESSAGE</text>
+      <text x="100" y="86" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">From: ceo@example.com</text>
+      <text x="100" y="98" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">Subject: Q4 Report</text>
+      <text x="100" y="110" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">Body: Please find...</text>
+
+      <text x="100" y="140" text-anchor="middle" fill="#ffcc00" font-family="IBM Plex Mono" font-size="8">① Compute Body Hash (bh)</text>
+      <text x="100" y="153" text-anchor="middle" fill="#ffcc00" font-family="IBM Plex Mono" font-size="8">SHA256(body) → base64</text>
+
+      <text x="100" y="175" text-anchor="middle" fill="#ffcc00" font-family="IBM Plex Mono" font-size="8">② Hash Selected Headers</text>
+      <text x="100" y="188" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">From+Subject+Date+bh</text>
+
+      <rect x="25" y="200" width="150" height="35" rx="3" fill="#0d0815" stroke="#b388ff"/>
+      <text x="100" y="215" text-anchor="middle" fill="#b388ff" font-family="IBM Plex Mono" font-size="9" font-weight="bold">③ Sign with</text>
+      <text x="100" y="228" text-anchor="middle" fill="#b388ff" font-family="IBM Plex Mono" font-size="9">PRIVATE KEY 🔐</text>
+
+      <rect x="25" y="245" width="150" height="50" rx="3" fill="#0b1522" stroke="#00ff88"/>
+      <text x="100" y="263" text-anchor="middle" fill="#00ff88" font-family="IBM Plex Mono" font-size="9" font-weight="bold">④ Add DKIM-Signature</text>
+      <text x="100" y="276" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">header to email</text>
+      <text x="100" y="288" text-anchor="middle" fill="#00ff88" font-family="IBM Plex Mono" font-size="8">b=W9P4Rfk2N+Kk...</text>
+
+      <text x="100" y="315" text-anchor="middle" fill="#00d4ff" font-family="IBM Plex Mono" font-size="8">⑤ Send Email</text>
+      <text x="100" y="328" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">via SMTP</text>
+
+      <!-- CENTER ARROW -->
+      <line x1="192" y1="200" x2="330" y2="200" stroke="#00d4ff" stroke-width="1.5" marker-end="url(#a1)"/>
+      <text x="261" y="193" text-anchor="middle" fill="#00d4ff" font-family="IBM Plex Mono" font-size="8">EMAIL + DKIM SIG</text>
+
+      <!-- RECEIVING SIDE -->
+      <rect x="330" y="20" width="200" height="360" rx="4" fill="#060b14" stroke="#132030"/>
+      <text x="430" y="42" text-anchor="middle" fill="#00ff88" font-family="IBM Plex Mono" font-size="10" font-weight="bold">RECEIVING SERVER</text>
+
+      <text x="430" y="70" text-anchor="middle" fill="#ffcc00" font-family="IBM Plex Mono" font-size="8">⑥ Extract DKIM-Signature</text>
+      <text x="430" y="83" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">d=example.com s=selector1</text>
+
+      <text x="430" y="105" text-anchor="middle" fill="#ffcc00" font-family="IBM Plex Mono" font-size="8">⑦ Query DNS for Public Key</text>
+      <text x="430" y="118" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">selector1._domainkey.</text>
+      <text x="430" y="130" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">example.com</text>
+
+      <text x="430" y="155" text-anchor="middle" fill="#ffcc00" font-family="IBM Plex Mono" font-size="8">⑧ Decrypt Signature</text>
+      <text x="430" y="168" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">Using PUBLIC KEY 🔓</text>
+
+      <text x="430" y="190" text-anchor="middle" fill="#ffcc00" font-family="IBM Plex Mono" font-size="8">⑨ Recompute Body Hash</text>
+      <text x="430" y="203" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">SHA256(received body)</text>
+
+      <text x="430" y="225" text-anchor="middle" fill="#ffcc00" font-family="IBM Plex Mono" font-size="8">⑩ Compare Hashes</text>
+
+      <rect x="345" y="240" width="170" height="55" rx="3" fill="#0b1522" stroke="#1c2e44"/>
+      <text x="430" y="262" text-anchor="middle" fill="#d8e8f8" font-family="IBM Plex Mono" font-size="9">bh_signed = bh_computed</text>
+      <text x="430" y="277" text-anchor="middle" fill="#d8e8f8" font-family="IBM Plex Mono" font-size="9">AND sig decrypts correctly</text>
+      <text x="430" y="290" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">= DKIM PASS ✓</text>
+
+      <!-- DNS SERVER -->
+      <rect x="570" y="60" width="160" height="80" rx="3" fill="#08061a" stroke="#b388ff"/>
+      <text x="650" y="82" text-anchor="middle" fill="#b388ff" font-family="IBM Plex Mono" font-size="10" font-weight="bold">DNS SERVER</text>
+      <text x="650" y="97" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">selector1._domainkey</text>
+      <text x="650" y="110" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">.example.com TXT:</text>
+      <text x="650" y="123" text-anchor="middle" fill="#00ff88" font-family="IBM Plex Mono" font-size="8">v=DKIM1;k=rsa;p=MIG...</text>
+      <text x="650" y="133" text-anchor="middle" fill="#00ff88" font-family="IBM Plex Mono" font-size="8">(PUBLIC KEY)</text>
+
+      <line x1="530" y1="110" x2="568" y2="100" stroke="#b388ff" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#a3)"/>
+      <line x1="568" y1="115" x2="530" y2="130" stroke="#b388ff" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#a3)"/>
+
+      <!-- RESULTS -->
+      <rect x="570" y="200" width="160" height="50" rx="3" fill="#081a10" stroke="#00ff88"/>
+      <text x="650" y="222" text-anchor="middle" fill="#00ff88" font-family="IBM Plex Mono" font-size="11" font-weight="bold">DKIM PASS ✓</text>
+      <text x="650" y="238" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">Authentic &amp; Unmodified</text>
+      <line x1="530" y1="265" x2="568" y2="228" stroke="#00ff88" stroke-width="1.5" marker-end="url(#a2)"/>
+
+      <rect x="570" y="270" width="160" height="50" rx="3" fill="#1a0810" stroke="#ff2d55"/>
+      <text x="650" y="292" text-anchor="middle" fill="#ff2d55" font-family="IBM Plex Mono" font-size="11" font-weight="bold">DKIM FAIL ❌</text>
+      <text x="650" y="308" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">Tampered or Forged</text>
+
+      <!-- Legend -->
+      <text x="460" y="385" text-anchor="middle" fill="#132030" font-family="IBM Plex Mono" font-size="9">🔐 Private Key (kept secret on server) · 🔓 Public Key (published in DNS)</text>
+    </svg>
+  </div>
+
+  <div class="note tip">
+    <strong>✅ DKIM vs SPF — الفرق الجوهري</strong>
+    <span class="ar">SPF يتحقق من مصدر الإرسال (من أي خادم؟). DKIM يتحقق من هوية المُرسِل وسلامة المحتوى (هل الرسالة أصيلة وغير معدّلة؟). DKIM يبقى صالحاً حتى بعد إعادة توجيه البريد، بينما SPF يفشل عادةً عند إعادة التوجيه.</span>
+    <span class="en" style="display:none">SPF verifies the sending source (from which server?). DKIM verifies sender identity and content integrity (is the message authentic and unmodified?). DKIM survives email forwarding, while SPF typically fails after forwarding.</span>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SECTION 3 — DMARC
+═══════════════════════════════════════ -->
+<section id="dmarc">
+<div class="wrap reveal">
+  <div class="sec-tag">03 — <span class="ar-i">مصادقة وإبلاغ وتوافق الرسائل المستندة إلى النطاق</span><span class="en-i">Domain-based Message Authentication</span></div>
+  <h2>DMARC — المظلة الجامعة</h2>
+  <p class="sec-desc ar">DMARC يجمع SPF وDKIM معاً ويُضيف سياسة واضحة: ماذا يفعل الخادم المستقبِل إذا فشل كلا البروتوكولين؟ كما يُرسِل تقارير تفصيلية للمالك عن كل رسالة تدّعي كونها من نطاقه.</p>
+  <p class="sec-desc en" style="display:none">DMARC ties SPF and DKIM together and adds a clear policy: what should the receiving server do if both protocols fail? It also sends detailed reports to the domain owner about every message claiming to be from their domain.</p>
+
+  <div class="code-block">
+    <span class="cb-tag">DMARC DNS TXT Record — _dmarc.example.com</span>
+    <span class="ck">_dmarc.example.com</span> <span class="cv">IN TXT</span>
+    <span class="ch">"v=DMARC1;</span>
+     <span class="cv">p=quarantine;</span>        <span class="cc">// السياسة: quarantine (تحجير)</span>
+     <span class="cv">sp=reject;</span>           <span class="cc">// سياسة النطاقات الفرعية: رفض</span>
+     <span class="cv">pct=100;</span>             <span class="cc">// تطبيق على 100% من الرسائل</span>
+     <span class="cv">adkim=s;</span>             <span class="cc">// تطابق DKIM صارم (strict)</span>
+     <span class="cv">aspf=r;</span>              <span class="cc">// تطابق SPF مرن (relaxed)</span>
+     <span class="cv">rua=mailto:dmarc@example.com;</span>  <span class="cc">// تقارير مجمّعة</span>
+     <span class="cv">ruf=mailto:forensic@example.com;</span> <span class="cc">// تقارير جنائية</span>
+     <span class="cv">fo=1"</span>               <span class="cc">// إرسال تقرير عند أي فشل</span>
+  </div>
+
+  <table class="tbl">
+    <thead><tr><th><span class="ar-i">السياسة</span><span class="en-i">Policy (p=)</span></th><th><span class="ar-i">الإجراء</span><span class="en-i">Action</span></th><th><span class="ar-i">الاستخدام</span><span class="en-i">Use Case</span></th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge b-g">none</span></td><td><span class="ar-i">لا إجراء — فقط مراقبة وتقارير</span><span class="en-i">No action — monitor only, reports sent</span></td><td><span class="ar-i">للبدء وجمع البيانات قبل التشديد</span><span class="en-i">For initial deployment and data gathering before enforcement</span></td></tr>
+      <tr><td><span class="badge b-y">quarantine</span></td><td><span class="ar-i">إرسال إلى مجلد الإسبام/الجيم</span><span class="en-i">Send to spam/junk folder</span></td><td><span class="ar-i">عند التأكد من شرعية رسائلك ولكن بحذر</span><span class="en-i">When confident in legitimate mail but still cautious</span></td></tr>
+      <tr><td><span class="badge b-r">reject</span></td><td><span class="ar-i">رفض الرسالة كلياً (SMTP bounce)</span><span class="en-i">Outright reject at SMTP level</span></td><td><span class="ar-i">الهدف النهائي — أقوى حماية</span><span class="en-i">Ultimate goal — strongest protection</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>🔗 DMARC Alignment — مفهوم التوافق</strong>
+    <span class="ar">DMARC يتطلب "توافقاً" بين النطاق في From: header وبين نطاق SPF (MAIL FROM) أو نطاق DKIM (d=). بدون التوافق، يمكن للمهاجم اجتياز SPF وDKIM بنطاقاتهما الخاصة بينما يُظهر نطاقاً مختلفاً في From:. relaxed يسمح بنطاقات فرعية، strict يتطلب تطابقاً تاماً.</span>
+    <span class="en" style="display:none">DMARC requires "alignment" between the From: domain and the SPF domain (MAIL FROM) or DKIM domain (d=). Without alignment, an attacker could pass SPF and DKIM using their own domains while showing a different From: domain. Relaxed allows subdomain matches; strict requires exact match.</span>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SECTION 4 — MAIL SECURITY GATEWAY
+═══════════════════════════════════════ -->
+<section id="gateway">
+<div class="wrap reveal">
+  <div class="sec-tag">04 — <span class="ar-i">بوابة أمان البريد الإلكتروني</span><span class="en-i">Mail Security Gateway</span></div>
+  <h2 class="ar">بوابة أمان البريد — كيف تعمل داخلياً</h2>
+  <h2 class="en" style="display:none">Mail Security Gateway — Internal Workings</h2>
+  <p class="sec-desc ar">بوابة أمان البريد (SEG) هي نظام متخصص يجلس بين الإنترنت وخادم البريد الداخلي، ويُخضِع كل رسالة واردة وصادرة لعشرات الفحوصات الأمنية قبل التسليم.</p>
+  <p class="sec-desc en" style="display:none">A Secure Email Gateway (SEG) is a specialized system that sits between the internet and the internal mail server, subjecting every inbound and outbound message to dozens of security checks before delivery.</p>
+
+  <!-- Gateway Architecture SVG -->
+  <div class="diagram-wrap">
+    <div class="diagram-title"><span class="ar-i">معمارية بوابة أمان البريد — خطوات المعالجة</span><span class="en-i">Secure Email Gateway Architecture — Processing Pipeline</span></div>
+    <svg viewBox="0 0 920 520" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:920px;display:block;margin:0 auto">
+      <defs>
+        <marker id="b1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#00d4ff"/></marker>
+        <marker id="b2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#ff2d55"/></marker>
+        <marker id="b3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#00ff88"/></marker>
+      </defs>
+
+      <!-- Internet -->
+      <ellipse cx="60" cy="260" rx="48" ry="48" fill="#060b14" stroke="#1c2e44"/>
+      <text x="60" y="256" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="9">INTERNET</text>
+      <text x="60" y="270" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="9">📧 Email</text>
+
+      <!-- Arrow to gateway -->
+      <line x1="108" y1="260" x2="148" y2="260" stroke="#00d4ff" stroke-width="2" marker-end="url(#b1)"/>
+
+      <!-- GATEWAY BOX -->
+      <rect x="148" y="30" width="600" height="460" rx="4" fill="#060b14" stroke="#00d4ff" stroke-width="1.5"/>
+      <text x="448" y="56" text-anchor="middle" fill="#00d4ff" font-family="IBM Plex Mono" font-size="12" font-weight="bold">SECURE EMAIL GATEWAY (SEG)</text>
+      <text x="448" y="72" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="9">Proofpoint / Mimecast / Microsoft Defender for Office 365 / Barracuda</text>
+
+      <!-- PIPELINE STEPS -->
+      <!-- Step 1: Connection Filtering -->
+      <rect x="168" y="85" width="130" height="60" rx="3" fill="#0b1522" stroke="#1c2e44"/>
+      <text x="233" y="107" text-anchor="middle" fill="#ffcc00" font-family="IBM Plex Mono" font-size="9" font-weight="bold">① CONNECTION</text>
+      <text x="233" y="120" text-anchor="middle" fill="#ffcc00" font-family="IBM Plex Mono" font-size="9">FILTERING</text>
+      <text x="233" y="133" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">IP Reputation · RBL</text>
+      <text x="233" y="144" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Geo-blocking · Rate limit</text>
+
+      <!-- Step 2: SPF/DKIM/DMARC -->
+      <rect x="318" y="85" width="130" height="60" rx="3" fill="#0b1522" stroke="#1c2e44"/>
+      <text x="383" y="107" text-anchor="middle" fill="#ffcc00" font-family="IBM Plex Mono" font-size="9" font-weight="bold">② AUTHENTICATION</text>
+      <text x="383" y="120" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">SPF · DKIM · DMARC</text>
+      <text x="383" y="131" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">ARC Validation</text>
+      <text x="383" y="144" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Header Anomaly Check</text>
+
+      <!-- Step 3: Anti-Spam -->
+      <rect x="468" y="85" width="130" height="60" rx="3" fill="#0b1522" stroke="#1c2e44"/>
+      <text x="533" y="107" text-anchor="middle" fill="#ffcc00" font-family="IBM Plex Mono" font-size="9" font-weight="bold">③ ANTI-SPAM</text>
+      <text x="533" y="120" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Bayesian Filter · ML</text>
+      <text x="533" y="131" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Heuristic Analysis</text>
+      <text x="533" y="144" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Spam Score Threshold</text>
+
+      <!-- Step 4: Anti-Malware -->
+      <rect x="618" y="85" width="110" height="60" rx="3" fill="#0b1522" stroke="#1c2e44"/>
+      <text x="673" y="107" text-anchor="middle" fill="#ffcc00" font-family="IBM Plex Mono" font-size="9" font-weight="bold">④ AV / MALWARE</text>
+      <text x="673" y="120" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Multi-engine AV</text>
+      <text x="673" y="131" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Signature-based</text>
+      <text x="673" y="144" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Hash matching</text>
+
+      <!-- Arrows row 1 -->
+      <line x1="298" y1="115" x2="316" y2="115" stroke="#00d4ff" stroke-width="1" marker-end="url(#b1)"/>
+      <line x1="448" y1="115" x2="466" y2="115" stroke="#00d4ff" stroke-width="1" marker-end="url(#b1)"/>
+      <line x1="598" y1="115" x2="616" y2="115" stroke="#00d4ff" stroke-width="1" marker-end="url(#b1)"/>
+
+      <!-- Step 5: URL Analysis -->
+      <rect x="168" y="200" width="130" height="60" rx="3" fill="#0b1522" stroke="#1c2e44"/>
+      <text x="233" y="222" text-anchor="middle" fill="#00d4ff" font-family="IBM Plex Mono" font-size="9" font-weight="bold">⑤ URL REWRITING</text>
+      <text x="233" y="235" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">URL Reputation Check</text>
+      <text x="233" y="246" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Rewrite to proxy</text>
+      <text x="233" y="257" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Safe Browsing API</text>
+
+      <!-- Step 6: Attachment Sandbox -->
+      <rect x="318" y="200" width="130" height="60" rx="3" fill="#0b1522" stroke="#ff8c00" stroke-width="1.5"/>
+      <text x="383" y="222" text-anchor="middle" fill="#ff8c00" font-family="IBM Plex Mono" font-size="9" font-weight="bold">⑥ SANDBOX</text>
+      <text x="383" y="235" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Detonation Chamber</text>
+      <text x="383" y="246" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Dynamic analysis</text>
+      <text x="383" y="257" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Behavioral monitoring</text>
+
+      <!-- Step 7: DLP -->
+      <rect x="468" y="200" width="130" height="60" rx="3" fill="#0b1522" stroke="#1c2e44"/>
+      <text x="533" y="222" text-anchor="middle" fill="#00d4ff" font-family="IBM Plex Mono" font-size="9" font-weight="bold">⑦ DLP / POLICY</text>
+      <text x="533" y="235" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Data Loss Prevention</text>
+      <text x="533" y="246" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Content inspection</text>
+      <text x="533" y="257" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Regex / PII detection</text>
+
+      <!-- Step 8: Anti-Phishing -->
+      <rect x="618" y="200" width="110" height="60" rx="3" fill="#0b1522" stroke="#ff2d55" stroke-width="1.5"/>
+      <text x="673" y="222" text-anchor="middle" fill="#ff2d55" font-family="IBM Plex Mono" font-size="9" font-weight="bold">⑧ ANTI-PHISH</text>
+      <text x="673" y="235" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Impersonation detect</text>
+      <text x="673" y="246" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Brand spoofing</text>
+      <text x="673" y="257" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Lookalike domains</text>
+
+      <!-- Row 2 arrows -->
+      <line x1="233" y1="148" x2="233" y2="198" stroke="#00d4ff" stroke-width="1" marker-end="url(#b1)"/>
+      <line x1="298" y1="230" x2="316" y2="230" stroke="#00d4ff" stroke-width="1" marker-end="url(#b1)"/>
+      <line x1="448" y1="230" x2="466" y2="230" stroke="#00d4ff" stroke-width="1" marker-end="url(#b1)"/>
+      <line x1="598" y1="230" x2="616" y2="230" stroke="#00d4ff" stroke-width="1" marker-end="url(#b1)"/>
+      <line x1="673" y1="148" x2="673" y2="198" stroke="#00d4ff" stroke-width="1" marker-end="url(#b1)"/>
+
+      <!-- DECISION BOX -->
+      <rect x="270" y="315" width="360" height="60" rx="3" fill="#0b1522" stroke="#00d4ff"/>
+      <text x="450" y="340" text-anchor="middle" fill="#d8e8f8" font-family="IBM Plex Mono" font-size="10" font-weight="bold">⑨ POLICY ENGINE — FINAL VERDICT</text>
+      <text x="450" y="355" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">Aggregate all check scores → Apply org policies → Determine action</text>
+      <text x="450" y="368" text-anchor="middle" fill="#6a88a0" font-family="IBM Plex Mono" font-size="8">DELIVER · QUARANTINE · REJECT · ENCRYPT · HOLD FOR REVIEW</text>
+
+      <line x1="233" y1="260" x2="290" y2="313" stroke="#00d4ff" stroke-width="1" marker-end="url(#b1)"/>
+      <line x1="450" y1="260" x2="450" y2="313" stroke="#00d4ff" stroke-width="1" marker-end="url(#b1)"/>
+      <line x1="673" y1="260" x2="610" y2="313" stroke="#00d4ff" stroke-width="1" marker-end="url(#b1)"/>
+
+      <!-- Outcomes -->
+      <rect x="168" y="415" width="100" height="45" rx="3" fill="#081a10" stroke="#00ff88"/>
+      <text x="218" y="436" text-anchor="middle" fill="#00ff88" font-family="IBM Plex Mono" font-size="9" font-weight="bold">DELIVER ✓</text>
+      <text x="218" y="449" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Inbox</text>
+
+      <rect x="283" y="415" width="100" height="45" rx="3" fill="#18120a" stroke="#ff8c00"/>
+      <text x="333" y="436" text-anchor="middle" fill="#ff8c00" font-family="IBM Plex Mono" font-size="9" font-weight="bold">QUARANTINE</text>
+      <text x="333" y="449" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Hold / Review</text>
+
+      <rect x="398" y="415" width="100" height="45" rx="3" fill="#1a0810" stroke="#ff2d55"/>
+      <text x="448" y="436" text-anchor="middle" fill="#ff2d55" font-family="IBM Plex Mono" font-size="9" font-weight="bold">REJECT ✗</text>
+      <text x="448" y="449" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Bounce / Drop</text>
+
+      <rect x="513" y="415" width="100" height="45" rx="3" fill="#0d0818" stroke="#b388ff"/>
+      <text x="563" y="436" text-anchor="middle" fill="#b388ff" font-family="IBM Plex Mono" font-size="9" font-weight="bold">ENCRYPT</text>
+      <text x="563" y="449" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">TLS / S/MIME</text>
+
+      <rect x="628" y="415" width="100" height="45" rx="3" fill="#0d1a08" stroke="#ffcc00"/>
+      <text x="678" y="436" text-anchor="middle" fill="#ffcc00" font-family="IBM Plex Mono" font-size="9" font-weight="bold">REVIEW</text>
+      <text x="678" y="449" text-anchor="middle" fill="#4a6480" font-family="IBM Plex Mono" font-size="8">Admin Approval</text>
+
+      <line x1="350" y1="375" x2="218" y2="413" stroke="#00ff88" stroke-width="1" marker-end="url(#b3)"/>
+      <line x1="390" y1="375" x2="333" y2="413" stroke="#ff8c00" stroke-width="1" marker-end="url(#b1)"/>
+      <line x1="450" y1="375" x2="448" y2="413" stroke="#ff2d55" stroke-width="1" marker-end="url(#b2)"/>
+      <line x1="510" y1="375" x2="563" y2="413" stroke="#b388ff" stroke-width="1" marker-end="url(#b1)"/>
+      <line x1="550" y1="375" x2="678" y2="413" stroke="#ffcc00" stroke-width="1" marker-end="url(#b1)"/>
+    </svg>
+  </div>
+
+  <!-- STEP-BY-STEP DETAIL -->
+  <h3 class="ar">شرح كل مرحلة بالتفصيل</h3>
+  <h3 class="en" style="display:none">Detailed Step-by-Step Explanation</h3>
+  <div class="steps">
+    <div class="step"><div class="sn"></div><div class="sb"><h4><span class="ar-i">① Connection Filtering — فلترة الاتصال</span><span class="en-i">① Connection Filtering</span></h4><p><span class="ar-i">أول نقطة دفاع. البوابة تتحقق من سمعة IP المُرسِل في قوائم الحجب (RBL: Realtime Blackhole List)، SORBS، SpamHaus، Barracuda Reputation. تفحص أيضاً معدل الإرسال وتطبق تقييد السرعة. الاتصالات من IPs معروفة بالإسبام تُوقَف هنا قبل استقبال أي بريد — أوفر اقتصادياً وأسرع.</span><span class="en-i">First line of defense. Gateway checks sender IP reputation against Realtime Blackhole Lists (RBL), SORBS, SpamHaus, Barracuda Reputation. Also checks sending rate and applies throttling. Connections from known spam IPs are dropped here before accepting any mail — most economical and fastest.</span></p></div></div>
+    <div class="step"><div class="sn"></div><div class="sb"><h4><span class="ar-i">② Authentication — المصادقة (SPF + DKIM + DMARC)</span><span class="en-i">② Authentication (SPF + DKIM + DMARC)</span></h4><p><span class="ar-i">البوابة تتحقق من SPF (هل IP المُرسِل مُصرَّح به؟)، DKIM (هل التوقيع الرقمي صالح؟)، DMARC (هل يتوافق النطاق في From: مع SPF/DKIM؟). تضيف نتائج التحقق كـ Authentication-Results header في الرسالة لاستخدامها في مراحل لاحقة.</span><span class="en-i">Gateway verifies SPF (is sender IP authorized?), DKIM (is digital signature valid?), DMARC (does From: domain align with SPF/DKIM?). Adds check results as Authentication-Results header for use in later stages.</span></p></div></div>
+    <div class="step"><div class="sn"></div><div class="sb"><h4><span class="ar-i">③ Anti-Spam Engine — محرك مكافحة الإسبام</span><span class="en-i">③ Anti-Spam Engine</span></h4><p><span class="ar-i">يُحلل محتوى الرسالة باستخدام خوارزميات Bayesian، قواعد هيورستيكية، ونماذج ML. يُحسب "Spam Score" لكل رسالة. SpamAssassin مثلاً يستخدم أكثر من 1000 قاعدة. عتبة الإسبام القياسية 5 نقاط. كل قاعدة تُضيف أو تُنقص نقاطاً.</span><span class="en-i">Analyzes message content using Bayesian algorithms, heuristic rules, and ML models. Computes a "Spam Score" for each message. SpamAssassin for example uses 1000+ rules. Standard spam threshold is 5 points. Each rule adds or subtracts points.</span></p></div></div>
+    <div class="step"><div class="sn"></div><div class="sb"><h4><span class="ar-i">④ Anti-Malware / AV — الكشف عن البرمجيات الخبيثة</span><span class="en-i">④ Anti-Malware / AV Scanning</span></h4><p><span class="ar-i">فحص جميع المرفقات بمحركات AV متعددة في آنٍ واحد (multi-engine). يُقارن hash الملفات بقواعد بيانات التوقيعات. يفحص الأنواع: .exe, .docm, .xlsm, .pdf, .zip, .js, .vbs, .lnk إلخ. يستخرج محتوى الأرشيفات المضغوطة للفحص.</span><span class="en-i">Scans all attachments with multiple simultaneous AV engines (multi-engine). Compares file hashes against signature databases. Checks types: .exe, .docm, .xlsm, .pdf, .zip, .js, .vbs, .lnk etc. Extracts compressed archive contents for scanning.</span></p></div></div>
+    <div class="step"><div class="sn"></div><div class="sb"><h4><span class="ar-i">⑤ URL Analysis & Rewriting — تحليل وإعادة كتابة الروابط</span><span class="en-i">⑤ URL Analysis & Rewriting</span></h4><p><span class="ar-i">استخراج جميع URLs من جسم HTML والنص. التحقق من سمعة كل رابط في قواعد بيانات التصيد (Google Safe Browsing, SURBL, URLhaus). إعادة كتابة الروابط لتمر عبر proxy الاستعراض الآمن (Time-of-Click protection). يحمي من روابط تكون شرعية وقت الإرسال لكن تتحول لخبيثة لاحقاً.</span><span class="en-i">Extracts all URLs from HTML body and text. Checks each link reputation against phishing databases (Google Safe Browsing, SURBL, URLhaus). Rewrites URLs to pass through safe browsing proxy (Time-of-Click protection). Protects against links that are benign at send time but become malicious later.</span></p></div></div>
+    <div class="step"><div class="sn"></div><div class="sb"><h4><span class="ar-i">⑥ Sandbox — غرفة الانفجار الآمنة</span><span class="en-i">⑥ Sandbox — Detonation Chamber</span></h4><p><span class="ar-i">أقوى وأبطأ مرحلة. المرفقات المشبوهة تُفتح في بيئة معزولة (VM) ويُرصد سلوكها: هل تتصل بالإنترنت؟ هل تُنشئ processes؟ هل تُعدّل Registry؟ هل تُشفّر ملفات؟ يكتشف Zero-Day malware الذي لا يظهر في قواعد التوقيعات. يُضيف تأخيراً من ثوانٍ إلى دقائق.</span><span class="en-i">Most powerful and slowest stage. Suspicious attachments are opened in an isolated VM and their behavior monitored: Does it phone home? Create processes? Modify Registry? Encrypt files? Discovers Zero-Day malware not in signature databases. Adds a delay of seconds to minutes.</span></p></div></div>
+    <div class="step"><div class="sn"></div><div class="sb"><h4><span class="ar-i">⑦ DLP — منع تسرب البيانات</span><span class="en-i">⑦ Data Loss Prevention (DLP)</span></h4><p><span class="ar-i">يفحص الرسائل الصادرة بحثاً عن بيانات حساسة: أرقام بطاقات ائتمان (PCI-DSS)، بيانات صحية (HIPAA)، أرقام هويات، معلومات سرية. يستخدم تعبيرات منتظمة (Regex)، قواعد بيانات البصمات (fingerprinting)، وML لاكتشاف سياق البيانات الحساسة.</span><span class="en-i">Inspects outbound messages for sensitive data: credit card numbers (PCI-DSS), health data (HIPAA), national IDs, confidential information. Uses regular expressions, fingerprinting databases, and ML for context-aware sensitive data detection.</span></p></div></div>
+    <div class="step"><div class="sn"></div><div class="sb"><h4><span class="ar-i">⑧ Anti-Phishing — مكافحة التصيد الاحتيالي</span><span class="en-i">⑧ Anti-Phishing & Impersonation Detection</span></h4><p><span class="ar-i">اكتشاف انتحال الهوية (Impersonation): هل "From" يشبه مسؤولاً تنفيذياً في المؤسسة؟ تحليل النطاقات المشابهة (lookalike domains): paypa1.com vs paypal.com. اكتشاف هجمات BEC (Business Email Compromise). فحص المحتوى للإشارات التلاعبية: "طلب عاجل"، "حوّل الآن".</span><span class="en-i">Detects impersonation: Does "From" resemble an executive in the organization? Analyzes lookalike domains: paypa1.com vs paypal.com. Detects BEC (Business Email Compromise) attacks. Inspects content for manipulation signals: "urgent request", "wire now".</span></p></div></div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SECTION 5 — ARTIFACT COLLECTION
+═══════════════════════════════════════ -->
+<section id="artifacts">
+<div class="wrap reveal">
+  <div class="sec-tag">05 — <span class="ar-i">جمع الآثار الجنائية للبريد الإلكتروني</span><span class="en-i">Email Forensic Artifact Collection</span></div>
+  <h2 class="ar">الآثار الجنائية — أين تجدها وكيف تجمعها</h2>
+  <h2 class="en" style="display:none">Forensic Artifacts — Where to Find Them & How to Collect</h2>
+  <p class="sec-desc ar">في الاستجابة لحوادث البريد الإلكتروني، يجب على المحلل جمع أدلة من مصادر متعددة. كل مصدر يكشف جزءاً من الصورة الكاملة للهجوم.</p>
+  <p class="sec-desc en" style="display:none">In email incident response, an analyst must collect evidence from multiple sources. Each source reveals part of the complete attack picture.</p>
+
+  <!-- ARTIFACTS EXAMPLES -->
+  <h3 class="ar">١. الآثار على مستوى الخادم</h3>
+  <h3 class="en" style="display:none">1. Server-Level Artifacts</h3>
+
+  <div class="code-block">
+    <span class="cb-tag">Exchange / Microsoft 365 — Message Trace (PowerShell)</span>
+    <span class="cc"># جمع تتبع الرسائل من Microsoft 365</span>
+    <span class="ci">Get-MessageTrace</span> <span class="cv">-SenderAddress</span> <span class="ck">"attacker@evil.com"</span> \
+      <span class="cv">-StartDate</span> <span class="ck">"2024-01-15"</span> <span class="cv">-EndDate</span> <span class="ck">"2024-01-16"</span> \
+      <span class="cv">-PageSize</span> <span class="ck">5000</span> | <span class="ci">Select-Object</span> Received, SenderAddress, RecipientAddress,
+        Subject, Status, MessageId, Size |
+      <span class="ci">Export-Csv</span> <span class="ck">"message_trace.csv"</span>
+
+    <span class="cc"># البحث عن جميع رسائل subject معين</span>
+    <span class="ci">Get-MessageTrace</span> <span class="cv">-Status</span> <span class="ck">Delivered</span> <span class="cv">-StartDate</span> <span class="ck">"2024-01-15"</span> |
+      <span class="ci">Where-Object</span> { <span class="cv">$_</span>.Subject <span class="cv">-like</span> <span class="ck">"*Invoice*"</span> }
+
+    <span class="cc"># تفاصيل رسالة محددة بالـ Message-ID</span>
+    <span class="ci">Get-MessageTraceDetail</span> <span class="cv">-MessageId</span> <span class="ck">"&lt;abc123@mail.evil.com&gt;"</span>
+  </div>
+
+  <div class="code-block">
+    <span class="cb-tag">Postfix / Linux Mail Server — Log Extraction</span>
+    <span class="cc"># استخراج سجلات Postfix لإرسال محدد</span>
+    <span class="ci">grep</span> <span class="ck">"attacker@evil.com"</span> /var/log/mail.log | <span class="ci">grep</span> <span class="ck">"Jan 15"</span>
+
+    <span class="cc"># تتبع رسالة بالـ Queue-ID</span>
+    <span class="ci">grep</span> <span class="cv">-E</span> <span class="ck">"ABC123DEF:"</span> /var/log/mail.log
+
+    <span class="cc"># استخراج جميع عناوين IP للمرسلين المشبوهين</span>
+    <span class="ci">grep</span> <span class="ck">"SASL LOGIN"</span> /var/log/mail.log | <span class="ci">awk</span> <span class="ck">'{print $7}'</span> | <span class="ci">sort</span> | <span class="ci">uniq -c</span> | <span class="ci">sort -rn</span>
+
+    <span class="cc"># فحص الرسائل في قائمة الانتظار</span>
+    <span class="ci">postqueue</span> <span class="cv">-p</span>
+    <span class="ci">postcat</span> <span class="cv">-q</span> <span class="ck">ABC123DEF</span>  <span class="cc"># عرض رسالة من القائمة</span>
+  </div>
+
+  <h3 class="ar">٢. آثار ملف البريد الإلكتروني (EML / MSG)</h3>
+  <h3 class="en" style="display:none">2. Email File Artifacts (EML / MSG)</h3>
+
+  <div class="code-block">
+    <span class="cb-tag">Extracting EML Artifacts with Python (emlx/eml parser)</span>
+    <span class="ci">import</span> email, hashlib, re
+    <span class="ci">from</span> email <span class="ci">import</span> policy
+    <span class="ci">from</span> pathlib <span class="ci">import</span> Path
+
+    <span class="cc"># تحميل ملف EML</span>
+    <span class="cv">msg</span> = email.message_from_bytes(
+        Path(<span class="ck">"suspicious.eml"</span>).read_bytes(), policy=policy.default
+    )
+
+    <span class="cc"># استخراج الترويسات الرئيسية</span>
+    <span class="cv">headers_of_interest</span> = [
+        <span class="ck">"From"</span>, <span class="ck">"To"</span>, <span class="ck">"Reply-To"</span>, <span class="ck">"Return-Path"</span>,
+        <span class="ck">"Message-ID"</span>, <span class="ck">"X-Originating-IP"</span>, <span class="ck">"Received"</span>,
+        <span class="ck">"Authentication-Results"</span>, <span class="ck">"DKIM-Signature"</span>
+    ]
+    <span class="ci">for</span> h <span class="ci">in</span> headers_of_interest:
+        <span class="ci">print</span>(<span class="ck">f"[{h}]: {msg[h]}"</span>)
+
+    <span class="cc"># استخراج المرفقات وحساب hashها</span>
+    <span class="ci">for</span> part <span class="ci">in</span> msg.walk():
+        <span class="ci">if</span> part.get_content_disposition() == <span class="ck">"attachment"</span>:
+            <span class="cv">filename</span> = part.get_filename()
+            <span class="cv">payload</span>  = part.get_payload(decode=<span class="cv">True</span>)
+            <span class="cv">md5</span>  = hashlib.md5(payload).hexdigest()
+            <span class="cv">sha256</span> = hashlib.sha256(payload).hexdigest()
+            <span class="ci">print</span>(<span class="ck">f"📎 {filename} | MD5: {md5} | SHA256: {sha256}"</span>)
+            <span class="cc"># حفظ المرفق للتحليل</span>
+            Path(<span class="ck">f"artifacts/{filename}"</span>).write_bytes(payload)
+
+    <span class="cc"># استخراج URLs من جسم HTML</span>
+    <span class="cv">html_body</span> = msg.get_body(preferencelist=(<span class="ck">"html"</span>,))
+    <span class="ci">if</span> html_body:
+        <span class="cv">urls</span> = re.findall(<span class="ck">r'href=["\']?(https?://[^\s"\'&gt;]+)'</span>, html_body.get_content())
+        <span class="ci">for</span> url <span class="ci">in</span> set(urls):
+            <span class="ci">print</span>(<span class="ck">f"🔗 URL: {url}"</span>)
+  </div>
+
+  <div class="code-block">
+    <span class="cb-tag">oletools — Analyzing Malicious Office Attachments</span>
+    <span class="cc"># تحليل ملفات Office المشبوهة (تحتوي Macros)</span>
+    <span class="ci">olevba</span> invoice.docm             <span class="cc"># فحص وعرض الـ VBA Macros</span>
+    <span class="ci">olevba</span> <span class="cv">--decode</span> invoice.docm     <span class="cc"># فك تشفير obfuscated strings</span>
+    <span class="ci">oledump</span> invoice.docm             <span class="cc"># عرض بنية OLE</span>
+    <span class="ci">mraptor</span> invoice.docm             <span class="cc"># تحديد خطورة الـ macros</span>
+    <span class="ci">oleid</span> invoice.docm               <span class="cc"># تحديد نوع الملف وخصائصه</span>
+
+    <span class="cc"># تحليل PDF مشبوه</span>
+    <span class="ci">pdfid</span> suspicious.pdf              <span class="cc"># إحصاءات سريعة</span>
+    <span class="ci">pdf-parser</span> <span class="cv">--search</span> JavaScript suspicious.pdf  <span class="cc"># بحث عن JS</span>
+    <span class="ci">peepdf</span> suspicious.pdf             <span class="cc"># تحليل شامل تفاعلي</span>
+  </div>
+
+  <h3 class="ar">٣. آثار الرابط والنطاق</h3>
+  <h3 class="en" style="display:none">3. URL & Domain Artifacts</h3>
+
+  <div class="code-block">
+    <span class="cb-tag">URL & Domain Intelligence Collection</span>
+    <span class="cc"># فحص سمعة URL</span>
+    <span class="ci">curl</span> <span class="cv">-s</span> <span class="ck">"https://www.virustotal.com/api/v3/urls"</span> \
+      <span class="cv">-H</span> <span class="ck">"x-apikey: YOUR_API_KEY"</span> \
+      <span class="cv">-d</span> <span class="ck">"url=http://suspicious-url.com/payload"</span>
+
+    <span class="cc"># استعلام WHOIS للنطاق</span>
+    <span class="ci">whois</span> suspicious-domain.com
+    <span class="ci">whois</span> <span class="cv">-h</span> whois.abuse.ch suspicious-domain.com
+
+    <span class="cc"># فحص تاريخ DNS (Passive DNS)</span>
+    <span class="ci">curl</span> <span class="ck">"https://api.securitytrails.com/v1/domain/evil.com/history/dns/a"</span> \
+      <span class="cv">-H</span> <span class="ck">"APIKEY: YOUR_KEY"</span>
+
+    <span class="cc"># فحص SSL Certificate</span>
+    <span class="ci">openssl</span> s_client <span class="cv">-connect</span> suspicious-domain.com:443 <span class="cv">&lt;&lt;&lt;</span> "" 2&gt;/dev/null | \
+      <span class="ci">openssl</span> x509 <span class="cv">-noout -text</span> | <span class="ci">grep</span> <span class="cv">-A2</span> <span class="ck">"Subject:"</span>
+
+    <span class="cc"># فحص IP Geolocation</span>
+    <span class="ci">curl</span> <span class="ck">"https://ipinfo.io/203.0.113.10/json"</span>
+  </div>
+
+  <h3 class="ar">٤. الآثار على أجهزة المستخدمين (Client-Side)</h3>
+  <h3 class="en" style="display:none">4. Client-Side Artifacts (User Endpoints)</h3>
+
+  <div class="code-block">
+    <span class="cb-tag">Outlook / Thunderbird — Local Email Artifact Locations</span>
+    <span class="cc">== Windows — Outlook PST/OST Files ==</span>
+    <span class="ck">%USERPROFILE%\Documents\Outlook Files\*.pst</span>     <span class="cc"># Personal folders</span>
+    <span class="ck">%LOCALAPPDATA%\Microsoft\Outlook\*.ost</span>           <span class="cc"># Offline cache</span>
+    <span class="ck">%APPDATA%\Microsoft\Outlook\</span>                     <span class="cc"># Outlook profile data</span>
+
+    <span class="cc">== Thunderbird Profile ==</span>
+    <span class="ck">%APPDATA%\Thunderbird\Profiles\*.default\Mail\</span>    <span class="cc"># MBOX format</span>
+
+    <span class="cc">== Linux / macOS ==</span>
+    <span class="ck">~/.thunderbird/</span>                                   <span class="cc"># Thunderbird</span>
+    <span class="ck">~/Library/Mail/</span>                                   <span class="cc"># macOS Mail.app</span>
+
+    <span class="cc"># استخراج PST باستخدام libpst</span>
+    <span class="ci">readpst</span> <span class="cv">-r</span> <span class="cv">-o</span> ./output Outlook.pst
+
+    <span class="cc"># تحليل MBOX file</span>
+    <span class="ci">python3</span> <span class="cv">-c</span> <span class="ck">"import mailbox; [print(m['subject']) for m in mailbox.mbox('Inbox')]"</span>
+  </div>
+
+  <div class="cg">
+    <div class="ccard">
+      <div class="cc-icon">📧</div>
+      <div class="cc-title">ملف EML / MSG</div>
+      <div class="cc-en">EML / MSG File</div>
+      <p class="ar">الرسالة الكاملة بترويساتها وجسمها ومرفقاتها. يُصدَّر مباشرة من معظم عملاء البريد. المصدر الأساسي للتحليل الجنائي.</p>
+      <p class="en" style="display:none">Complete message with headers, body, and attachments. Exported directly from most mail clients. Primary source for forensic analysis.</p>
+    </div>
+    <div class="ccard">
+      <div class="cc-icon">🗒️</div>
+      <div class="cc-title">سجلات SMTP</div>
+      <div class="cc-en">SMTP Server Logs</div>
+      <p class="ar">تُظهر الـ IP الأصلية للاتصال، وقت الاستقبال، نتائج فلترة SPF/DKIM، وحجم الرسالة. لا يمكن تزويرها من المُرسِل.</p>
+      <p class="en" style="display:none">Show original connection IP, receipt time, SPF/DKIM filtering results, and message size. Cannot be forged by the sender.</p>
+    </div>
+    <div class="ccard">
+      <div class="cc-icon">🔒</div>
+      <div class="cc-title">Authentication-Results</div>
+      <div class="cc-en">Auth-Results Header</div>
+      <p class="ar">Header يُضيفه خادم الاستقبال يحتوي على نتائج SPF وDKIM وDMARC. يُكتب من قِبَل خادم موثوق — لا يُعدَّله المُرسِل.</p>
+      <p class="en" style="display:none">Header added by receiving server containing SPF, DKIM, DMARC results. Written by a trusted server — not modifiable by sender.</p>
+    </div>
+    <div class="ccard">
+      <div class="cc-icon">📎</div>
+      <div class="cc-title">المرفقات</div>
+      <div class="cc-en">Attachments</div>
+      <p class="ar">أهم الآثار. يُحسَب hash (MD5/SHA256) لكل مرفق ويُبحث في VirusTotal وHybrid Analysis وMalwareBazaar. يُحفَظ في بيئة معزولة.</p>
+      <p class="en" style="display:none">Most critical artifacts. Hash (MD5/SHA256) each attachment and search VirusTotal, Hybrid Analysis, MalwareBazaar. Store in isolated environment.</p>
+    </div>
+    <div class="ccard">
+      <div class="cc-icon">🔗</div>
+      <div class="cc-title">الروابط (URLs)</div>
+      <div class="cc-en">Embedded URLs</div>
+      <p class="ar">استخرج جميع URLs من HTML وNS. افحص سمعتها في URLscan.io وVirusTotal. انتبه لإعادة التوجيه والنطاقات المشابهة. لا تفتحها مباشرة!</p>
+      <p class="en" style="display:none">Extract all URLs from HTML and text. Check reputation in URLscan.io and VirusTotal. Watch for redirects and lookalike domains. Never open directly!</p>
+    </div>
+    <div class="ccard">
+      <div class="cc-icon">🌐</div>
+      <div class="cc-title">سجلات DNS / Gateway</div>
+      <div class="cc-en">DNS / Gateway Logs</div>
+      <p class="ar">سجلات بوابة الأمان تُظهر كل رسالة وقراراتها. سجلات DNS تُظهر استعلامات المستخدم للنطاقات في الرسالة بعد فتحها.</p>
+      <p class="en" style="display:none">Security gateway logs show every message and decisions. DNS logs show user queries to domains in the message after opening.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SECTION 6 — HEADER ANALYSIS
+═══════════════════════════════════════ -->
+<section id="headers">
+<div class="wrap reveal">
+  <div class="sec-tag">06 — <span class="ar-i">تحليل ترويسات البريد الإلكتروني</span><span class="en-i">Email Header Deep Analysis</span></div>
+  <h2 class="ar">تحليل الترويسات — دليل كامل</h2>
+  <h2 class="en" style="display:none">Header Analysis — Complete Guide</h2>
+  <p class="sec-desc ar">ترويسات البريد الإلكتروني هي السجل الزمني الكامل لرحلة الرسالة من المُرسِل إلى المستقبِل. كل خادم يُضيف طبقة من الترويسات. قراءتها بشكل صحيح تكشف عن الهجمات وتُحدد الأصل الحقيقي.</p>
+  <p class="sec-desc en" style="display:none">Email headers are the complete chronological record of a message's journey from sender to recipient. Each server adds a layer of headers. Reading them correctly reveals attacks and identifies the true origin.</p>
+
+  <!-- REAL HEADER EXAMPLE WITH ANNOTATIONS -->
+  <h3 class="ar">مثال ترويسة كاملة مشروحة — رسالة تصيد احتيالي</h3>
+  <h3 class="en" style="display:none">Fully Annotated Header Example — Phishing Email</h3>
+
+  <div class="header-panel">
+    <div class="hp-tabs">
+      <div class="hp-tab active" onclick="showTab(this,'raw')"><span class="ar-i">الترويسة الخام</span><span class="en-i">Raw Headers</span></div>
+      <div class="hp-tab" onclick="showTab(this,'annotated')"><span class="ar-i">مشروحة</span><span class="en-i">Annotated</span></div>
+      <div class="hp-tab" onclick="showTab(this,'iocs')"><span class="ar-i">مؤشرات الاختراق</span><span class="en-i">IOCs Extracted</span></div>
+    </div>
+
+    <!-- RAW HEADERS TAB -->
+    <div class="hp-content active" id="tab-raw">
+      <div class="hf">
+<span class="hf-key">Delivered-To:</span> <span class="hf-val">victim@targetcorp.com</span>
+<span class="hf-key">Received:</span> <span class="hf-val">from mail-gateway.targetcorp.com (mail-gateway.targetcorp.com [10.0.0.5])</span>
+        <span class="hf-val">by mx.targetcorp.com with ESMTP id x7si123456</span>
+        <span class="hf-val">for &lt;victim@targetcorp.com&gt;; Mon, 15 Jan 2024 09:23:41 +0300</span>
+<span class="hf-key">Received:</span> <span class="hf-val">from smtp.evil-phishing.ru (smtp.evil-phishing.ru [91.108.56.22])</span>
+        <span class="hf-val">by mail-gateway.targetcorp.com with ESMTP id m5si789012</span>
+        <span class="hf-val">for &lt;victim@targetcorp.com&gt;; Mon, 15 Jan 2024 09:23:39 +0300</span>
+<span class="hf-key">Authentication-Results:</span> <span class="hf-val">mail-gateway.targetcorp.com;</span>
+       <span class="hf-sus">spf=softfail</span> <span class="hf-warn">(mail-gateway.targetcorp.com: domain of billing@nationalbank.com does not designate 91.108.56.22 as permitted sender)</span>
+       <span class="hf-sus">dkim=fail</span> <span class="hf-warn">reason="no signature" header.i=@nationalbank.com</span>
+       <span class="hf-sus">dmarc=fail</span> <span class="hf-warn">action=quarantine header.from=nationalbank.com</span>
+<span class="hf-key">X-Spam-Status:</span> <span class="hf-warn">Yes, score=8.7</span>
+<span class="hf-key">X-Spam-Flag:</span> <span class="hf-sus">YES</span>
+<span class="hf-key">X-Originating-IP:</span> <span class="hf-sus">91.108.56.22</span>
+<span class="hf-key">Return-Path:</span> <span class="hf-sus">&lt;billing@phishing-domain.ru&gt;</span>
+<span class="hf-key">From:</span> <span class="hf-sus">"National Bank Billing" &lt;billing@nationalbank.com&gt;</span>
+<span class="hf-key">Reply-To:</span> <span class="hf-sus">collect@evil-payments.com</span>
+<span class="hf-key">To:</span> <span class="hf-val">victim@targetcorp.com</span>
+<span class="hf-key">Subject:</span> <span class="hf-warn">URGENT: Your account will be suspended in 24 hours - Action Required</span>
+<span class="hf-key">Date:</span> <span class="hf-val">Mon, 15 Jan 2024 06:23:38 +0000</span>
+<span class="hf-key">Message-ID:</span> <span class="hf-sus">&lt;20240115062338.1A2B3C4D5E6F@smtp.evil-phishing.ru&gt;</span>
+<span class="hf-key">MIME-Version:</span> <span class="hf-val">1.0</span>
+<span class="hf-key">Content-Type:</span> <span class="hf-val">multipart/mixed; boundary="----=_Part_12345_6789"</span>
+<span class="hf-key">X-Mailer:</span> <span class="hf-info">PHPMailer 6.5.1</span>
+      </div>
+    </div>
+
+    <!-- ANNOTATED TAB -->
+    <div class="hp-content" id="tab-annotated">
+      <div class="steps">
+        <div class="step"><div class="sn"></div><div class="sb">
+          <h4><span class="hf-key">Received: headers</span> — <span class="ar-i">قراءتها من الأسفل للأعلى</span><span class="en-i">Read bottom to top</span></h4>
+          <p><span class="ar-i">أحدث Received يظهر أعلاها. الأقدم (حيث بدأت الرسالة) أسفلها. كل خادم يُضيف سطر Received في الأعلى. لتحديد الـ IP الأصلية اقرأ آخر Received مضاف من مصدر خارج شبكتك الداخلية.</span><span class="en-i">Most recent Received is topmost. The oldest (where message originated) is at the bottom. Each server prepends a Received line. To find the originating IP, read the last Received added by a server external to your network.</span></p>
+          <div class="hf" style="font-size:11px">
+<span class="hf-info">← هذا أُضيف بواسطة خادمنا الداخلي</span>
+<span class="hf-key">Received:</span> from mail-gateway [10.0.0.5] by mx.targetcorp.com <span class="hf-val">at 09:23:41</span>
+
+<span class="hf-warn">← هذا مصدر الرسالة الحقيقي (خارجي)</span>
+<span class="hf-key">Received:</span> from smtp.evil-phishing.ru <span class="hf-sus">[91.108.56.22]</span> by mail-gateway <span class="hf-val">at 09:23:39</span>
+<span class="hf-note">/// IP الأصلي: 91.108.56.22 — تحقق منه في threat intel</span>
+          </div>
+        </div></div>
+
+        <div class="step"><div class="sn"></div><div class="sb">
+          <h4><span class="hf-key">Authentication-Results</span> — <span class="ar-i">نتائج المصادقة</span><span class="en-i">Auth Results</span></h4>
+          <p><span class="ar-i">ثلاثة فشول واضحة: SPF softfail (91.108.56.22 ليس في سجل nationalbank.com)، DKIM fail (لا يوجد توقيع)، DMARC fail مع إجراء quarantine. هذا وحده يُؤكد أن الرسالة ليست من nationalbank.com الحقيقي.</span><span class="en-i">Three clear failures: SPF softfail (91.108.56.22 not in nationalbank.com record), DKIM fail (no signature), DMARC fail with quarantine action. This alone confirms the message is NOT from the real nationalbank.com.</span></p>
+          <div class="hf" style="font-size:11px">
+<span class="hf-sus">spf=softfail</span> <span class="hf-warn">// IP المُرسِل غير مُصرَّح به في سجل nationalbank.com SPF</span>
+<span class="hf-sus">dkim=fail</span> <span class="hf-warn">reason="no signature"  // لا يوجد توقيع DKIM أصلاً</span>
+<span class="hf-sus">dmarc=fail</span> <span class="hf-warn">action=quarantine  // From: لا يتوافق مع SPF/DKIM</span>
+          </div>
+        </div></div>
+
+        <div class="step"><div class="sn"></div><div class="sb">
+          <h4><span class="hf-key">From: vs Return-Path: vs Reply-To:</span> — <span class="ar-i">التناقض المقصود</span><span class="en-i">Intentional Mismatch</span></h4>
+          <p><span class="ar-i">هذا هو قلب هجوم التصيد. ثلاثة عناوين مختلفة:</span><span class="en-i">This is the heart of the phishing attack. Three different addresses:</span></p>
+          <div class="hf" style="font-size:11px">
+<span class="hf-key">From:</span>       <span class="hf-sus">billing@nationalbank.com</span>  <span class="hf-note">← ما يرى المستخدم (مزيف)</span>
+<span class="hf-key">Return-Path:</span> <span class="hf-sus">billing@phishing-domain.ru</span> <span class="hf-note">← SMTP envelope (الحقيقي)</span>
+<span class="hf-key">Reply-To:</span>    <span class="hf-sus">collect@evil-payments.com</span>  <span class="hf-note">← لو رد المستخدم يصل للمهاجم</span>
+          </div>
+        </div></div>
+
+        <div class="step"><div class="sn"></div><div class="sb">
+          <h4><span class="hf-key">Message-ID:</span> — <span class="ar-i">كاشف هوية الخادم</span><span class="en-i">Server Identity Revealer</span></h4>
+          <p><span class="ar-i">Message-ID يُولَّد تلقائياً بواسطة خادم الإرسال. الجزء بعد @ يُظهر hostname الخادم الحقيقي. هنا: smtp.evil-phishing.ru — يتناقض مع الادعاء بأن الرسالة من nationalbank.com.</span><span class="en-i">Message-ID is auto-generated by the sending server. The part after @ reveals the real server hostname. Here: smtp.evil-phishing.ru — contradicts the claim to be from nationalbank.com.</span></p>
+          <div class="hf" style="font-size:11px">
+<span class="hf-key">Message-ID:</span> <span class="hf-sus">&lt;20240115062338.1A2B3C4D5E6F@smtp.evil-phishing.ru&gt;</span>
+<span class="hf-note">/// domain بعد @ = smtp.evil-phishing.ru ≠ nationalbank.com ← تناقض</span>
+          </div>
+        </div></div>
+
+        <div class="step"><div class="sn"></div><div class="sb">
+          <h4><span class="hf-key">X-Mailer:</span> — <span class="ar-i">أداة الإرسال</span><span class="en-i">Sending Tool Fingerprint</span></h4>
+          <p><span class="ar-i">PHPMailer مكتبة PHP لإرسال البريد. تُستخدم كثيراً في حملات التصيد المبرمجة. البنوك الحقيقية لا ترسل بريدها عبر PHPMailer مباشرةً. هذا مؤشر قوي.</span><span class="en-i">PHPMailer is a PHP library for sending mail. Commonly used in programmatic phishing campaigns. Real banks do not send official communications via raw PHPMailer. Strong indicator.</span></p>
+        </div></div>
+
+        <div class="step"><div class="sn"></div><div class="sb">
+          <h4><span class="hf-key">Date: Timezone Analysis</span> — <span class="ar-i">تحليل التوقيت</span><span class="en-i">Timestamp Analysis</span></h4>
+          <p><span class="ar-i">الرسالة أُرسِلت 06:23:38 UTC+0 ووصلت 09:23:39 UTC+3 — توقيت متزامن تقريباً. لكن الفارق بين Date: في الرسالة والـ Received: على الخادم يمكن أن يكشف تعديلاً مقصوداً للوقت. تحقق من التسلسل المنطقي: هل الـ Date قبل آخر Received؟</span><span class="en-i">Message sent at 06:23:38 UTC+0, received at 09:23:39 UTC+3 — roughly synchronized. However, discrepancies between the Date: in the message and the server Received: can reveal intentional time manipulation. Verify logical sequence: is Date before the last Received?</span></p>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- IOCs TAB -->
+    <div class="hp-content" id="tab-iocs">
+      <h4 style="color:var(--cyan);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px">
+        <span class="ar-i">مؤشرات الاختراق المستخرجة (IOCs)</span><span class="en-i">Extracted Indicators of Compromise (IOCs)</span>
+      </h4>
+      <table class="tbl">
+        <thead><tr><th><span class="ar-i">النوع</span><span class="en-i">IOC Type</span></th><th><span class="ar-i">القيمة</span><span class="en-i">Value</span></th><th><span class="ar-i">المصدر</span><span class="en-i">Source</span></th><th><span class="ar-i">الإجراء</span><span class="en-i">Action</span></th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge b-r">IP Address</span></td><td><code style="color:var(--red);font-family:'IBM Plex Mono',monospace">91.108.56.22</code></td><td>Received: / X-Originating-IP</td><td><span class="ar-i">Block at firewall · VirusTotal · AbuseIPDB</span><span class="en-i">Block at firewall · VirusTotal · AbuseIPDB</span></td></tr>
+          <tr><td><span class="badge b-r">Domain</span></td><td><code style="color:var(--red);font-family:'IBM Plex Mono',monospace">evil-phishing.ru</code></td><td>Message-ID / Received</td><td><span class="ar-i">Block DNS · WHOIS · Passive DNS</span><span class="en-i">Block DNS · WHOIS · Passive DNS</span></td></tr>
+          <tr><td><span class="badge b-r">Domain</span></td><td><code style="color:var(--red);font-family:'IBM Plex Mono',monospace">phishing-domain.ru</code></td><td>Return-Path</td><td><span class="ar-i">Block DNS · نطاق Envelope الحقيقي</span><span class="en-i">Block DNS · True envelope domain</span></td></tr>
+          <tr><td><span class="badge b-r">Email</span></td><td><code style="color:var(--red);font-family:'IBM Plex Mono',monospace">collect@evil-payments.com</code></td><td>Reply-To</td><td><span class="ar-i">Block · هذا العنوان يستقبل ردود الضحايا</span><span class="en-i">Block · This receives victim replies</span></td></tr>
+          <tr><td><span class="badge b-o">Domain</span></td><td><code style="color:var(--orange);font-family:'IBM Plex Mono',monospace">evil-payments.com</code></td><td>Reply-To domain</td><td><span class="ar-i">Block · WHOIS investigation</span><span class="en-i">Block · WHOIS investigation</span></td></tr>
+          <tr><td><span class="badge b-y">Message-ID</span></td><td><code style="color:var(--yellow);font-family:'IBM Plex Mono',monospace">&lt;20240115062338...@smtp.evil-phishing.ru&gt;</code></td><td>Message-ID header</td><td><span class="ar-i">تتبع في سجلات البريد للعثور على ضحايا آخرين</span><span class="en-i">Search mail logs to find other victims</span></td></tr>
+          <tr><td><span class="badge b-p">Software</span></td><td><code style="color:var(--purple);font-family:'IBM Plex Mono',monospace">PHPMailer 6.5.1</code></td><td>X-Mailer</td><td><span class="ar-i">Fingerprint لحملة التصيد</span><span class="en-i">Phishing campaign fingerprint</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- HEADER FIELDS QUICK REFERENCE -->
+  <h3 class="ar">مرجع سريع — جميع حقول الترويسة المهمة</h3>
+  <h3 class="en" style="display:none">Quick Reference — All Important Header Fields</h3>
+
+  <table class="tbl">
+    <thead><tr><th><span class="ar-i">الحقل</span><span class="en-i">Header Field</span></th><th><span class="ar-i">من يكتبه؟</span><span class="en-i">Written By?</span></th><th><span class="ar-i">يمكن تزويره؟</span><span class="en-i">Forgeable?</span></th><th><span class="ar-i">أهميته التحليلية</span><span class="en-i">Analytical Importance</span></th></tr></thead>
+    <tbody>
+      <tr><td><strong>Received:</strong></td><td><span class="ar-i">كل خادم يمر عبره</span><span class="en-i">Every transit server</span></td><td><span class="badge b-y">جزئياً</span></td><td><span class="ar-i">تتبع مسار الرسالة الكامل. الأولى (الداخلية) موثوقة تماماً</span><span class="en-i">Traces complete message path. First (internal) is fully trusted</span></td></tr>
+      <tr><td><strong>Authentication-Results:</strong></td><td><span class="ar-i">خادم الاستقبال</span><span class="en-i">Receiving server</span></td><td><span class="badge b-g">لا</span></td><td><span class="ar-i">أهم حقل للمحلل — SPF/DKIM/DMARC results</span><span class="en-i">Most important field for analyst — SPF/DKIM/DMARC results</span></td></tr>
+      <tr><td><strong>From:</strong></td><td><span class="ar-i">المُرسِل</span><span class="en-i">Sender</span></td><td><span class="badge b-r">نعم</span></td><td><span class="ar-i">ما يرى المستخدم — قابل للتزوير بالكامل</span><span class="en-i">What the user sees — fully forgeable</span></td></tr>
+      <tr><td><strong>Return-Path:</strong></td><td><span class="ar-i">المُرسِل / Envelope</span><span class="en-i">Sender / Envelope</span></td><td><span class="badge b-r">نعم</span></td><td><span class="ar-i">Envelope MAIL FROM — الذي يفحصه SPF</span><span class="en-i">Envelope MAIL FROM — checked by SPF</span></td></tr>
+      <tr><td><strong>Reply-To:</strong></td><td><span class="ar-i">المُرسِل</span><span class="en-i">Sender</span></td><td><span class="badge b-r">نعم</span></td><td><span class="ar-i">⚠ كثيراً ما يختلف عن From: في التصيد — وجهة الردود</span><span class="en-i">⚠ Often differs from From: in phishing — where replies go</span></td></tr>
+      <tr><td><strong>Message-ID:</strong></td><td><span class="ar-i">خادم الإرسال</span><span class="en-i">Sending server</span></td><td><span class="badge b-y">جزئياً</span></td><td><span class="ar-i">hostname بعد @ يكشف الخادم الحقيقي</span><span class="en-i">Domain after @ reveals true sending server</span></td></tr>
+      <tr><td><strong>X-Originating-IP:</strong></td><td><span class="ar-i">بعض مزودي الخدمة</span><span class="en-i">Some mail providers</span></td><td><span class="badge b-g">نادراً</span></td><td><span class="ar-i">IP الجهاز المُرسِل الأصلي (Gmail, Yahoo)</span><span class="en-i">Original sending device IP (Gmail, Yahoo add this)</span></td></tr>
+      <tr><td><strong>X-Forwarded-To:</strong></td><td><span class="ar-i">خوادم إعادة التوجيه</span><span class="en-i">Forwarding servers</span></td><td><span class="badge b-g">لا</span></td><td><span class="ar-i">تتبع إعادة التوجيه</span><span class="en-i">Tracks email forwarding</span></td></tr>
+      <tr><td><strong>DKIM-Signature:</strong></td><td><span class="ar-i">خادم النطاق المُوقِّع</span><span class="en-i">Signing domain server</span></td><td><span class="badge b-g">لا</span></td><td><span class="ar-i">التوقيع الرقمي — تحقق من d= مقابل From:</span><span class="en-i">Digital signature — check d= against From:</span></td></tr>
+      <tr><td><strong>X-Spam-Status:</strong></td><td><span class="ar-i">SpamAssassin / SEG</span><span class="en-i">SpamAssassin / SEG</span></td><td><span class="badge b-g">لا</span></td><td><span class="ar-i">درجة الإسبام والقواعد المُطابِقة</span><span class="en-i">Spam score and matching rules</span></td></tr>
+      <tr><td><strong>X-Mailer:</strong></td><td><span class="ar-i">برنامج الإرسال</span><span class="en-i">Sending software</span></td><td><span class="badge b-r">نعم</span></td><td><span class="ar-i">Fingerprint للأداة المستخدمة</span><span class="en-i">Fingerprint of sending tool/campaign</span></td></tr>
+    </tbody>
+  </table>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SECTION 7 — BODY ANALYSIS
+═══════════════════════════════════════ -->
+<section id="body">
+<div class="wrap reveal">
+  <div class="sec-tag">07 — <span class="ar-i">تحليل جسم الرسالة</span><span class="en-i">Email Body Analysis</span></div>
+  <h2 class="ar">تحليل جسم الرسالة والمرفقات</h2>
+  <h2 class="en" style="display:none">Email Body & Attachment Analysis</h2>
+  <p class="sec-desc ar">جسم الرسالة يحتوي على الحمولة الفعلية للهجوم — روابط تصيد، مرفقات خبيثة، محتوى مُشفَّر مُموَّه. التحليل الجيد يتطلب معاينة الـ source الخام.</p>
+  <p class="sec-desc en" style="display:none">The message body contains the actual attack payload — phishing links, malicious attachments, obfuscated encoded content. Good analysis requires examining the raw source.</p>
+
+  <!-- MIME STRUCTURE -->
+  <h3 class="ar">بنية MIME — هيكل الرسالة متعددة الأجزاء</h3>
+  <h3 class="en" style="display:none">MIME Structure — Multi-part Message</h3>
+
+  <div class="code-block">
+    <span class="cb-tag">Typical Phishing Email MIME Structure</span>
+    <span class="ck">MIME-Version:</span> <span class="cv">1.0</span>
+    <span class="ck">Content-Type:</span> <span class="cv">multipart/mixed;</span> boundary=<span class="ch">"----=_Part_OUTER"</span>
+
+    <span class="cc">------=_Part_OUTER</span>
+    <span class="ck">Content-Type:</span> <span class="cv">multipart/alternative;</span> boundary=<span class="ch">"----=_Part_INNER"</span>
+
+      <span class="cc">------=_Part_INNER</span>
+      <span class="ck">Content-Type:</span> <span class="cv">text/plain;</span> charset=UTF-8
+      <span class="cc">[Plain text version of phishing message]</span>
+
+      <span class="cc">------=_Part_INNER</span>
+      <span class="ck">Content-Type:</span> <span class="cv">text/html;</span> charset=UTF-8
+      <span class="ck">Content-Transfer-Encoding:</span> <span class="cv">base64</span>
+      <span class="cc">[Base64 encoded HTML — decode to see actual phishing page HTML]</span>
+      <span class="ch">PCFET0NUWVBFIGh0bWw+...</span>  <span class="cc">← decode this!</span>
+
+    <span class="cc">------=_Part_OUTER</span>
+    <span class="ck">Content-Type:</span> <span class="cv">application/vnd.openxmlformats-officedocument.wordprocessingml.document</span>
+    <span class="ck">Content-Disposition:</span> attachment; filename=<span class="ch">"Invoice_2024.docx"</span>
+    <span class="ck">Content-Transfer-Encoding:</span> <span class="cv">base64</span>
+    <span class="ch">UEsDBBQABgAIAAAAIQB5...</span>  <span class="cc">← this is the attachment</span>
+  </div>
+
+  <h3 class="ar">تقنيات الإخفاء في HTML — كيف يخدع المهاجمون</h3>
+  <h3 class="en" style="display:none">HTML Obfuscation Techniques — How Attackers Deceive</h3>
+
+  <div class="code-block">
+    <span class="cb-tag">Obfuscation Technique 1 — HTML Entity Encoding</span>
+    <span class="cc">// المهاجم يكتب الـ URL بترميز HTML Entities لإخفائه عن فلاتر الكلمات</span>
+    <span class="ce">&lt;a href="&#104;&#116;&#116;&#112;&#115;&#58;&#47;&#47;&#101;&#118;&#105;&#108;&#46;&#99;&#111;&#109;"&gt;Click here&lt;/a&gt;</span>
+    <span class="cc">// يتحول عند عرضه في المتصفح إلى: https://evil.com</span>
+    <span class="cc">// استخدم: https://www.urldecoder.org أو python:</span>
+    <span class="ci">python3</span> -c <span class="ck">"import html; print(html.unescape('&amp;#104;&amp;#116;&amp;#116;&amp;#112;...'))"</span>
+  </div>
+
+  <div class="code-block">
+    <span class="cb-tag">Obfuscation Technique 2 — Base64 Encoded Redirector</span>
+    <span class="cc">// URL يمر عبر redirector مُشفَّر بـ base64</span>
+    <span class="ce">&lt;a href="https://legitimate-site.com/redirect?url=aHR0cHM6Ly9ldmlsLmNvbS9sb2dpbg=="&gt;</span>
+    <span class="cc">// فك تشفير base64:</span>
+    <span class="ci">echo</span> <span class="ck">"aHR0cHM6Ly9ldmlsLmNvbS9sb2dpbg=="</span> | base64 <span class="cv">-d</span>
+    <span class="cc">// النتيجة: https://evil.com/login</span>
+  </div>
+
+  <div class="code-block">
+    <span class="cb-tag">Obfuscation Technique 3 — CSS Hidden Text (Hidden Keywords)</span>
+    <span class="cc">// نص مخفي لخداع فلاتر محتوى SEG</span>
+    <span class="ce">&lt;span style="display:none;color:white;font-size:1px"&gt;</span>
+    <span class="ce">  legitimate invoice payment approved finance department trusted</span>
+    <span class="ce">&lt;/span&gt;</span>
+    <span class="cc">// يخدع الفلاتر بإضافة كلمات "شرعية" مخفية عن المستخدم</span>
+  </div>
+
+  <div class="code-block">
+    <span class="cb-tag">Obfuscation Technique 4 — JavaScript Redirect</span>
+    <span class="cc">// بعض SEGs لا تُشغّل JavaScript — يتحايل عليها بـ JS redirect</span>
+    <span class="ce">&lt;script&gt;</span>
+    <span class="ce">  var p="https://"; var h="evil"; var d=".com/steal";</span>
+    <span class="ce">  window.location = p + h + d; // Dynamic URL construction</span>
+    <span class="ce">&lt;/script&gt;</span>
+  </div>
+
+  <!-- ATTACHMENT ANALYSIS TABLE -->
+  <h3 class="ar">تحليل أنواع المرفقات الخبيثة</h3>
+  <h3 class="en" style="display:none">Malicious Attachment Analysis by Type</h3>
+
+  <table class="tbl">
+    <thead><tr>
+      <th><span class="ar-i">النوع</span><span class="en-i">Type</span></th>
+      <th><span class="ar-i">آلية الهجوم</span><span class="en-i">Attack Vector</span></th>
+      <th><span class="ar-i">أدوات التحليل</span><span class="en-i">Analysis Tools</span></th>
+      <th><span class="ar-i">ما تبحث عنه</span><span class="en-i">What to Look For</span></th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="badge b-o">.docm / .xlsm</span></td>
+        <td><span class="ar-i">VBA Macros تُنزّل وتُشغّل payload</span><span class="en-i">VBA Macros download and execute payload</span></td>
+        <td><code style="font-size:11px;color:var(--cyan)">olevba, oledump, mraptor</code></td>
+        <td><span class="ar-i">Auto_Open, Document_Open, Shell(), CreateObject, URLDownloadToFile</span><span class="en-i">Auto_Open, Document_Open, Shell(), CreateObject, URLDownloadToFile</span></td>
+      </tr>
+      <tr>
+        <td><span class="badge b-r">.pdf</span></td>
+        <td><span class="ar-i">JavaScript مضمّن، روابط، exploits</span><span class="en-i">Embedded JavaScript, links, exploits</span></td>
+        <td><code style="font-size:11px;color:var(--cyan)">pdfid, pdf-parser, peepdf</code></td>
+        <td><span class="ar-i">/JavaScript, /OpenAction, /Launch, /EmbeddedFile, عدد كبير لـ /JS</span><span class="en-i">/JavaScript, /OpenAction, /Launch, /EmbeddedFile, high /JS count</span></td>
+      </tr>
+      <tr>
+        <td><span class="badge b-p">.lnk</span></td>
+        <td><span class="ar-i">Windows Shortcut يُشغّل PowerShell مخفياً</span><span class="en-i">Windows Shortcut executes hidden PowerShell</span></td>
+        <td><code style="font-size:11px;color:var(--cyan)">lnkanalyser, python-lnk</code></td>
+        <td><span class="ar-i">Target path طويل، PowerShell -enc، MSHTA، Regsvr32، Certutil</span><span class="en-i">Long target path, PowerShell -enc, MSHTA, Regsvr32, Certutil</span></td>
+      </tr>
+      <tr>
+        <td><span class="badge b-y">.html / .htm</span></td>
+        <td><span class="ar-i">صفحة تصيد كاملة محلية، HTML smuggling</span><span class="en-i">Full local phishing page, HTML smuggling</span></td>
+        <td><code style="font-size:11px;color:var(--cyan)">curl, python beautifulsoup</code></td>
+        <td><span class="ar-i">base64 blob في &lt;script&gt;، atob()، Blob URL، iframe redirect</span><span class="en-i">base64 blob in &lt;script&gt;, atob(), Blob URL, iframe redirect</span></td>
+      </tr>
+      <tr>
+        <td><span class="badge b-c">.zip / .rar</span></td>
+        <td><span class="ar-i">يحتوي .exe أو .js أو .lnk أو ملفات مشفرة بكلمة مرور</span><span class="en-i">Contains .exe, .js, .lnk, or password-encrypted files</span></td>
+        <td><code style="font-size:11px;color:var(--cyan)">7z, unzip, binwalk</code></td>
+        <td><span class="ar-i">كلمة مرور في الرسالة، ملفات مزدوجة الامتداد invoice.pdf.exe</span><span class="en-i">Password in message body, double extension files invoice.pdf.exe</span></td>
+      </tr>
+      <tr>
+        <td><span class="badge b-g">.iso / .img</span></td>
+        <td><span class="ar-i">يتجاوز Mark-of-the-Web، يحتوي .exe مباشرة</span><span class="en-i">Bypasses Mark-of-the-Web, contains .exe directly</span></td>
+        <td><code style="font-size:11px;color:var(--cyan)">7z, file, strings</code></td>
+        <td><span class="ar-i">ملفات تنفيذية داخل ISO، autorun.inf، shortcuts</span><span class="en-i">Executables inside ISO, autorun.inf, shortcuts</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- IOC EXTRACTION WORKFLOW -->
+  <h3 class="ar">سير عمل استخراج مؤشرات الاختراق الكامل</h3>
+  <h3 class="en" style="display:none">Complete IOC Extraction Workflow</h3>
+
+  <div class="code-block">
+    <span class="cb-tag">Complete Email Forensics Workflow — CLI</span>
+    <span class="cc">## ١. استخراج الترويسات والـ IOCs الأساسية</span>
+    <span class="ci">python3</span> -m email_analyzer suspicious.eml
+
+    <span class="cc">## ٢. استخراج hash المرفقات</span>
+    <span class="ci">python3</span> -c <span class="ck">"
+import email, hashlib
+from pathlib import Path
+msg = email.message_from_bytes(Path('suspicious.eml').read_bytes())
+for part in msg.walk():
+    if part.get_filename():
+        payload = part.get_payload(decode=True)
+        print(f'{part.get_filename()}: SHA256={hashlib.sha256(payload).hexdigest()}')
+"</span>
+
+    <span class="cc">## ٣. فحص hash في VirusTotal</span>
+    <span class="ci">curl</span> <span class="cv">-s</span> "https://www.virustotal.com/api/v3/files/HASH_HERE" \
+      <span class="cv">-H</span> "x-apikey: YOUR_VT_KEY" | python3 <span class="cv">-m</span> json.tool | <span class="ci">grep</span> <span class="cv">-A5</span> '"stats"'
+
+    <span class="cc">## ٤. استخراج URLs من HTML body</span>
+    <span class="ci">python3</span> <span class="cv">-c</span> <span class="ck">"
+import re, email
+from pathlib import Path
+msg = email.message_from_bytes(Path('suspicious.eml').read_bytes())
+for part in msg.walk():
+    ct = part.get_content_type()
+    if ct in ('text/html', 'text/plain'):
+        body = part.get_payload(decode=True).decode('utf-8', errors='ignore')
+        urls = re.findall(r'https?://[^\s\"\'&lt;&gt;]+', body)
+        for u in set(urls): print('URL:', u)
+"</span>
+
+    <span class="cc">## ٥. فحص URL في URLscan.io</span>
+    <span class="ci">curl</span> <span class="cv">-X POST</span> "https://urlscan.io/api/v1/scan/" \
+      <span class="cv">-H</span> "API-Key: YOUR_KEY" <span class="cv">-H</span> "Content-Type: application/json" \
+      <span class="cv">-d</span> '{"url":"http://suspicious-url.com","visibility":"private"}'
+
+    <span class="cc">## ٦. التحقق من SPF/DKIM/DMARC يدوياً</span>
+    <span class="ci">dig</span> TXT example.com <span class="cv">+short</span> | <span class="ci">grep</span> spf
+    <span class="ci">dig</span> TXT selector1._domainkey.example.com <span class="cv">+short</span>
+    <span class="ci">dig</span> TXT _dmarc.example.com <span class="cv">+short</span>
+
+    <span class="cc">## ٧. فحص IP في AbuseIPDB</span>
+    <span class="ci">curl</span> "https://api.abuseipdb.com/api/v2/check?ipAddress=91.108.56.22&maxAgeInDays=90" \
+      <span class="cv">-H</span> "Key: YOUR_KEY" <span class="cv">-H</span> "Accept: application/json"
+  </div>
+
+  <div class="note tip">
+    <strong>🏆 أدوات التحليل الموصى بها</strong>
+    <span class="ar">
+      <strong>MXToolbox:</strong> Header analyzer ممتاز online · <strong>Google Admin Toolbox:</strong> تحليل headers تفاعلي ·
+      <strong>PhishTool:</strong> تحليل رسائل تصيد متكامل · <strong>EmailAnalyzer (DFIR.tips):</strong> تحليل .eml ·
+      <strong>Sublime Security:</strong> قواعد YARA لرسائل البريد · <strong>VirusTotal:</strong> فحص هashes وURLs ·
+      <strong>URLscan.io:</strong> تحليل URLs آمن · <strong>AbuseIPDB:</strong> سمعة IPs
+    </span>
+    <span class="en" style="display:none">
+      <strong>MXToolbox:</strong> Excellent online header analyzer · <strong>Google Admin Toolbox:</strong> Interactive header analysis ·
+      <strong>PhishTool:</strong> Full phishing email analysis · <strong>EmailAnalyzer (DFIR.tips):</strong> .eml analysis ·
+      <strong>Sublime Security:</strong> YARA rules for email · <strong>VirusTotal:</strong> Hash and URL checking ·
+      <strong>URLscan.io:</strong> Safe URL analysis · <strong>AbuseIPDB:</strong> IP reputation
+    </span>
+  </div>
+</div>
+</section>
+
+<footer>
+<div class="wrap">
+  <div class="foot-inner">
+    <div class="foot-brand">Email Security Deep Dive · SPF · DKIM · DMARC · Gateway · Forensics</div>
+    <div class="foot-copy">Ahmed Fatouh · Defcraft Academy · DFIR &amp; SOC Training</div>
+  </div>
+</div>
+</footer>
+
+<script>
+// ── LANG ──
+function setLang(lang){
+  const body=document.body;
+  const btnAr=document.getElementById('btn-ar');
+  const btnEn=document.getElementById('btn-en');
+  if(lang==='en'){
+    body.classList.add('en-mode');
+    btnEn.classList.add('active');btnAr.classList.remove('active');
+    document.querySelectorAll('.en').forEach(e=>e.style.display='block');
+    document.querySelectorAll('.ar').forEach(e=>e.style.display='none');
+    document.querySelectorAll('.en-i').forEach(e=>e.style.display='inline');
+    document.querySelectorAll('.ar-i').forEach(e=>e.style.display='none');
+  } else {
+    body.classList.remove('en-mode');
+    btnAr.classList.add('active');btnEn.classList.remove('active');
+    document.querySelectorAll('.ar').forEach(e=>e.style.display='block');
+    document.querySelectorAll('.en').forEach(e=>e.style.display='none');
+    document.querySelectorAll('.ar-i').forEach(e=>e.style.display='inline');
+    document.querySelectorAll('.en-i').forEach(e=>e.style.display='none');
+  }
+}
+
+// ── TABS ──
+function showTab(el, tabId){
+  const panel=el.closest('.header-panel');
+  panel.querySelectorAll('.hp-tab').forEach(t=>t.classList.remove('active'));
+  panel.querySelectorAll('.hp-content').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-'+tabId).classList.add('active');
+}
+
+// ── SCROLL PROGRESS ──
+window.addEventListener('scroll',()=>{
+  const scroll=window.scrollY;
+  const height=document.documentElement.scrollHeight-window.innerHeight;
+  document.getElementById('sbar').style.width=(scroll/height*100)+'%';
+});
+
+// ── REVEAL ──
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis')});
+},{threshold:.08});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

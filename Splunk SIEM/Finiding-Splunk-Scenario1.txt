@@ -1,0 +1,100 @@
+My env.
+Org-name: Wayne Enterprises
+Domain-name:imreallynotbatman.com "Joomla CMS"
+IP-address is:192.168.250.70
+
+Top-Source-IP-Address Communicate With the Domain-name 
+1- 40.80.148.42   20932 request	
+2- 23.22.63.114   1236 request
+
+reconnaissance 
+Attacker IP Scanner is: 40.80.148.42
+recon tool: Acunetix-Product: WVS/10.0 (Acunetix Web Vulnerability Scanner - Free Edition)
+web-server scaned vicitm: 192.168.250.70/joomla
+
+
+weaponization 
+attacker ip address 23.22.63.114 related to 12 domain-name 
+waynecorinc.com 	A	23.22.63.114 	2019-02-18 11:00	2019-02-18 11:00	AS14618 AMAZON-AES	United States
+wanecorpinc.com 	A	23.22.63.114 	2019-02-18 11:00	2019-02-18 11:00	AS14618 AMAZON-AES	United States
+wayncorpinc.com 	A	23.22.63.114 	2019-02-18 11:00	2019-02-18 11:00	AS14618 AMAZON-AES	United States
+WYNECORPINC.COM 	A	23.22.63.114 	2019-02-18 11:00	2019-02-18 11:00	AS14618 AMAZON-AES	United States
+waynecrpinc.com 	A	23.22.63.114 	2019-02-18 11:00	2019-02-18 11:00	AS14618 AMAZON-AES	United States
+wayneorpinc.com 	A	23.22.63.114 	2019-02-17 11:00	2019-02-17 11:00	AS14618 AMAZON-AES	United States
+waynecorpnc.com 	A	23.22.63.114 	2019-01-24 11:00	2019-01-24 11:00	AS14618 AMAZON-AES	United States
+po1s0n1vy.com 		A	23.22.63.114 	2018-07-08 10:00	2018-07-08 10:00	AS14618 AMAZON-AES	United States
+www.po1s0n1vy.com 	A	23.22.63.114 	2018-06-23 10:00	2018-06-23 10:00	AS14618 AMAZON-AES	United States
+prankglassinebracket.jumpingcrab.com 	A	23.22.63.114 	2018-05-05 10:00	2018-05-05 10:00	AS14618 AMAZON-AES	United States
+
+possible Phishing
+Domain wanecorpinc.com register by this email LILLIAN.ROSE@PO1S0N1VY.COM
+Domain wanecorpinc.com Org-Name is TOXICODENDRON INC. 
+Domain wanecorpinc.com address is 1 EDGE FORREST LANE SPRINGFIELD US 
+
+
+Email Lookup for LILLIAN.ROSE@PO1S0N1VY.COM
+	wayncorpinc.com	2017-05-17
+	wanecorpinc.com	2017-05-18
+	wayneorpinc.com	2017-05-18
+	waynecrpinc.com	2017-05-18
+	wynecorpinc.com	2017-05-18
+	waynecorinc.com	2017-05-18
+	waynecorpnc.com	2017-11-15
+
+
+
+Exploitation (Inital Foothold)
+
+
+23.22.63.114 performed a brute-force attack against the joomla web server "/joomla/administrator/index.php" "412 try"
+ 
+Compromised Password Login Using brute-forcing attack 
+2016-08-10 14:48:05.858 	batman 	40.80.148.42
+2016-08-10 14:46:33.689 	batman 	23.22.63.114 
+
+
+installation (mainitian access)
+
+
+aae3f5a29935e6abcc2c2754d12a9af0 
+	
+39eecefa9a13293a93bb20036eaf1f5e --> filename: 	http://23.22.63.114/
+	
+c99131e0169171935c5ac32615ed6261 --> filename: MirandaTateScreensaver.scr.exe
+
+Malware 
+
+filename: C:\inetpub\wwwroot\joomla\3791.exe
+MD5=AAE3F5A29935E6ABCC2C2754D12A9AF0 
+SHA256=EC78C938D8453739CA2A370B9C275971EC46CAF6E479DE2B2D04E97CC47FA45D
+Computername: we1149srv.waynecorpinc.local
+
+
+Command And Control
+
+prankglassinebracket.jumpingcrab.com --> domain-name for the c2-server 
+ip-address for the c2-domain : 23.22.63.114
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
