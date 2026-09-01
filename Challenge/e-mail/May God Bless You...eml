@@ -1,0 +1,74 @@
+Delivered-To: o.gunal977@gmail.com
+Received: by 2002:a05:7000:4689:0:0:0:0 with SMTP id l9csp4131148map;
+        Mon, 21 Feb 2022 18:18:08 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJyr87ZImMTzonx2xgLStwrpubyOOiwh2jBjNx7KOVFOVxerKrjzGmkLYPd9+lT09x378FVo
+X-Received: by 2002:a63:8bc9:0:b0:365:3b6:47fb with SMTP id j192-20020a638bc9000000b0036503b647fbmr17942508pge.147.1645496288442;
+        Mon, 21 Feb 2022 18:18:08 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1645496288; cv=none;
+        d=google.com; s=arc-20160816;
+        b=yZ791V5VFUdfOJJnRQ9/Oe0oOWZrLJ/eR0ciT4iAJwOSTqvxtmMSLqItYvoH5Ir00m
+         JluuU8xC9/wLPYUlbJ/lgUdnHzhwtGxd3dia7QakHYuzE78Thh63L+cJ59bm/Wdnp997
+         zT4om+kDOIcDPsScU+SxGUCHjwK2MS4oP+zYoef3/+268D5Bufuj/fcPSp9qRAAyDEgT
+         5ZT8v+2fNxli7YuEE8BI0smhUIPvzCxSZInsvzjyBvbClFvoufoicr/eGCjVcUcTfV4H
+         BqY6ANqWAMlv6KnQBIz6g++RVWBPxJXYsBhz3hXwj9vEifBCvgWMeGqZVf4YtPmyzgfh
+         pa/Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20160816;
+        h=message-id:content-transfer-encoding:mime-version:date:subject:to
+         :from:reply-to;
+        bh=v8o7mdBNXkAnCaHgg3u86sUZRWiVJKE7b+tyurVJrIk=;
+        b=ybrqOF3nSyVly/KSc1976dQJLn2vPpIRblA8fTnGKqvOj8hYbWxNCUNePAETu50K51
+         Tuu7bO2Q/hK75NoOMMtQhkDYWdSHiaGaXzbXiSjhBsdrRFuLkLLm0TpWeUtzi4gDZT0S
+         n/FCO9kkNONKsLNQF4935MfgFkfI/i1RVEMze35E86vCQ/JIbdcl4VtGBkjZ7g7KzGHM
+         n9zusDNN+x71bB+/GLjXb+/3nGeFy9tXaoRKNA4k2+bjQdeLGcaF2lkBfaCYXxIMz56F
+         JVWZNzypgoNR+NhKyXeRo0EcOlPdb/qeqcBp6cnbUXWrQ7YR2Sd+WjTMNOiQ1CADknah
+         wr1w==
+ARC-Authentication-Results: i=1; mx.google.com;
+       spf=pass (google.com: domain of mrs.dara@jcom.home.ne.jp designates 222.227.81.181 as permitted sender) smtp.mailfrom=mrs.dara@jcom.home.ne.jp
+Return-Path: <mrs.dara@jcom.home.ne.jp>
+Received: from mgw1.mx.zaq.ne.jp (snd01105-jc.im.kddi.ne.jp. [222.227.81.181])
+        by mx.google.com with ESMTPS id y4si10368943pfi.188.2022.02.21.18.17.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 21 Feb 2022 18:18:08 -0800 (PST)
+Received-SPF: pass (google.com: domain of mrs.dara@jcom.home.ne.jp designates 222.227.81.181 as permitted sender) client-ip=222.227.81.181;
+Authentication-Results: mx.google.com;
+       spf=pass (google.com: domain of mrs.dara@jcom.home.ne.jp designates 222.227.81.181 as permitted sender) smtp.mailfrom=mrs.dara@jcom.home.ne.jp
+Received: from mgw1.mx.zaq.ne.jp by osmta1005-jc.im.kddi.ne.jp with ESMTP
+          id <20220222021744492.HQXF.56035.mgw1.mx.zaq.ne.jp@omta1005.jcom.zaq.ne.jp>;
+          Tue, 22 Feb 2022 11:17:44 +0900
+Received: from User by omta1005-jc.im.kddi.ne.jp with SMTP
+          id <20220222021744186.KMIX.45921.User@omta1005.jcom.zaq.ne.jp>;
+          Tue, 22 Feb 2022 11:17:44 +0900
+Reply-To: <mrs.dara@daum.net>
+From: "Mrs. Dara Patton"<mrs.dara@jcom.home.ne.jp>
+To: me
+Subject: Re: May God Bless You..
+Date: Mon, 21 Feb 2022 18:17:36 -0800
+MIME-Version: 1.0
+Content-Type: text/plain;
+	charset="Windows-1251"
+Content-Transfer-Encoding: 7bit
+X-Priority: 3
+X-MSMail-Priority: Normal
+X-Mailer: Microsoft Outlook Express 6.00.2600.0000
+X-MimeOLE: Produced By Microsoft MimeOLE V6.00.2600.0000
+Message-Id: <20220222021744186.KMIX.45921.User@omta1005.jcom.zaq.ne.jp>
+
+Beloved One,
+
+My name is Mrs. Dara Patton, I got your email address from an online e-mail Database Directory through the Internet search and it's true we do not know each other but My spirit led me to write you this email.
+
+I am a dying sick woman and I'm writing from my sickbed, I want to donate 1,400,000, British Pound Sterling, to you for charity Work all over the World especial at this time the world is fighting against this world pandemic called Coronavirus (COVID-19)
+
+I write to you with heavy tears in my eyes and great sorrow in my heart because my Doctor informed me that It will only take the will of God for me to survive due to my complicated health issues (CANCER).
+
+Based on this, I want to transfer my inheritance fund of 1,400,000, British Pound Sterling that was deposited by my late husband, I need a faithful and God-fearing person who will use it according to my desire and that of my late husband as we have no child after so many years of our marriage.
+
+We want you to use the funds for charity causes, while 15% will be kept by you as compensation for taking this responsibility to help mankind, a lot of people are suffering right now in the World because of this COVID-19 and I want you to use this money to help as many people as possible during this difficult moment in the History of the World.
+
+The disbursements should be made to charities such as orphanages, motherless babies homes, poor widows, disabled, humanitarian causes, and people who need money to revive the economy/business.
+
+I will wait to hear from you to know if you can handle this task with honesty and in good faith.
+
+Warm wishes.
+
+Mrs. Dara Patton

@@ -1,0 +1,48 @@
+Delivered-To: o.gunal977@gmail.com
+Received: by 2002:a05:7000:4689:0:0:0:0 with SMTP id l9csp2322178map;
+        Mon, 21 Mar 2022 23:27:05 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJzteMw9SUw/otkbGyLoegDv5LviUZ2MYP2MYGNClB8VAfV0qFbYEnfs2hpIw84vCYH4Z4Mc
+X-Received: by 2002:a17:907:3f17:b0:6da:68b6:7876 with SMTP id hq23-20020a1709073f1700b006da68b67876mr23797862ejc.740.1647930425567;
+        Mon, 21 Mar 2022 23:27:05 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1647930425; cv=none;
+        d=google.com; s=arc-20160816;
+        b=HmPVRfQDFFYKaHcoHY1OVGPj8JlkmoAMCfLaLY7jc6Eb+GZHKEGtRiEEsyzG2moCJe
+         6/RjgClSPmkvOzH0C4eBl/eNl+yrbqWf1COWdF5HQ+C/PA+CCggUoZFRsMUrcgdkLhHf
+         shLTlC3VLVDFb2ocoNltcNmgaxkV8qT0oPvQwk30ApwjFEhGWi2f6oP5ECjZ0dxsSRvt
+         S1ZLfpzGbsTxedEI45oBWIE2bR6pT0ps26Q4rX2dul6Bk4ALhACRv6o59OsD7z4D75Wp
+         sfDhjmVH9WgdCz61WdgEjbLseGW62kZiHRqcjKLxP+7XICfpFiIHJwfcZNkm1VNv/wSq
+         XM2w==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20160816;
+        h=date:message-id:reply-to:errors-to:importance:from:subject:to;
+        bh=bDA42nr/RLyDjPG9+040wf84UQREeW1pGU/yYeHgvws=;
+        b=vVXDTlodF2pA3SqYf3jimogaVG2pN4/YL2MdKfWfRMCMUkaYH8UYI/46RGH7/aCgjb
+         sJTkilakXq4ntJPCtnnw2+joy1MzjMvYrdIVaKwZZKCXyianS/yaL8vK09BWvdvFLSIS
+         ruUbz96wWp/bpA7PJLDUV7KwgDfjjcmjNUU0ioPAfzTIENiXr+Ky+Do/5iAcwWOBFqUN
+         r1g5JdmgeiTEnl5pdID91lqjpX9AU07LiUqNlfYIVTCKc96Nmclvid4n9yrmoI2GBKgt
+         bAy0HZB93fd/5c8c9AhlfHXe7ibnD9oGuk/c9uFIRg+hA6XzW5jltoh6CANHsaBjUyvN
+         N+2Q==
+ARC-Authentication-Results: i=1; mx.google.com;
+       spf=softfail (google.com: domain of transitioning info@letsdefend.io does not designate 101.99.94.116 as permitted sender) smtp.mailfrom=info@letsdefend.io
+Return-Path: <info@letsdefend.io>
+Received: from emkei.cz (emkei.cz. [101.99.94.116])
+        by mx.google.com with ESMTPS id s20-20020a170906779400b006df94c2cd83si8915532ejm.394.2022.03.21.23.27.05
+        for <o.gunal977@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 21 Mar 2022 23:27:05 -0700 (PDT)
+Received-SPF: softfail (google.com: domain of transitioning info@letsdefend.io does not designate 101.99.94.116 as permitted sender) client-ip=101.99.94.116;
+Authentication-Results: mx.google.com;
+       spf=softfail (google.com: domain of transitioning info@letsdefend.io does not designate 101.99.94.116 as permitted sender) smtp.mailfrom=info@letsdefend.io
+Received: by emkei.cz (Postfix, from userid 33)
+	id EDEF52885C; Tue, 22 Mar 2022 07:27:04 +0100 (CET)
+To: o.gunal977@gmail.com
+Subject: Account details
+From: "Jack" <info@letsdefend.io>
+X-Priority: 3 (Normal)
+Importance: Normal
+Errors-To: info@letsdefend.io
+Reply-To: info.letsdefend123722@gmail.com
+Content-Type: text/plain; charset=utf-8
+Message-Id: <20220322062704.EDEF52885C@emkei.cz>
+Date: Tue, 22 Mar 2022 07:27:04 +0100 (CET)
+
+just test message

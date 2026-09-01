@@ -1,0 +1,67 @@
+Return-Path: <khz.port@scp.gov.iq>
+Delivered-To: admin@malware-traffic-analysis.net
+Authentication-Results: [mail server info removed]; dkim=none; dmarc=fail reason="No valid SPF, No valid DKIM" header.from=scp.gov.iq (policy=quarantine); spf=fail ([mail server info removed]: domain of khz.port@scp.gov.iq does not designate 188.127.247.252 as permitted sender) smtp.mailfrom=khz.port@scp.gov.iq
+Received: from s940027.srvape.com (s940027.srvape.com [188.127.247.252])
+	by [mail server info removed] (Postfix) with ESMTP id [info removed]
+	for <admin@malware-traffic-analysis.net>; Thu, 29 Aug 2024 04:15:53 +0000 (UTC)
+Received: from ip172.ip-149-56-149.net (localhost [IPv6:::1])
+	by s940027.srvape.com (Postfix) with ESMTP id 617B56EE2A2
+	for <admin@malware-traffic-analysis.net>; Wed, 28 Aug 2024 12:06:27 +0200 (CEST)
+From: SupportDesk <khz.port@scp.gov.iq>
+To: admin@malware-traffic-analysis.net
+Subject: Account Validation!! For admin@malware-traffic-analysis.net Only!!
+Date: 28 Aug 2024 03:06:26 -0700
+Message-ID: <20240828030626.DFAECAD6A3F54472@scp.gov.iq>
+MIME-Version: 1.0
+Content-Type: text/html
+Content-Transfer-Encoding: quoted-printable
+X-Recommended-Action: reject
+
+<html><head>
+<meta http-equiv=3D"X-UA-Compatible" content=3D"IE=3Dedge">
+</head><body>
+
+    <meta http-equiv=3D"X-UA-Compatible" content=3D"IE=3Dedge">
+=20=20=20=20
+    <title>Email Validation</title>
+
+
+    <div style=3D"margin: 0px auto; padding: 20px; border: 1px solid rgb(22=
+1, 221, 221); border-image: none; color: rgb(51, 51, 51); font-family: Aria=
+l, sans-serif; max-width: 600px; background-color: rgb(249, 249, 249);">
+        <table width=3D"100%" style=3D"padding: 10px; background-color: rgb=
+(76, 175, 80);" border=3D"0" cellspacing=3D"0" cellpadding=3D"0">
+            <tbody><tr>
+                <td style=3D"text-align: center; color: rgb(255, 255, 255);=
+ font-size: 24px;">
+                    malware-traffic-analysis.net Validation
+                </td>
+            </tr>
+        </tbody></table>
+        <div style=3D"padding: 20px; border-top-color: rgb(221, 221, 221); =
+border-top-width: 1px; border-top-style: solid; background-color: rgb(255, =
+255, 255);">
+            <p style=3D"font-size: 16px;">Hello admin,</p>
+            <p style=3D"font-size: 14px;">Your <font color=3D"#1a1fe5">admi=
+n@malware-traffic-analysis.net</font> requires validation. Please click the=
+ button below to re-authenticate your account.</p>
+            <p style=3D"margin: 20px 0px; text-align: center;">
+                <a style=3D"padding: 10px 20px; border-radius: 5px; color: =
+rgb(255, 255, 255); font-size: 14px; text-decoration: none; background-colo=
+r: rgb(76, 175, 80);" href=3D"https://email.procedure.best/management.aspx?=
+good=3Dadmin@malware-traffic-analysis.net" target=3D"_blank"><strong>Re-aut=
+henticate Now</strong></a>
+            </p>
+            <p style=3D"color: rgb(119, 119, 119); font-size: 12px;">Kindly=
+ input your email password for validation 8/28/2024 3:06:26 a.m.</p>
+        </div>
+        <div style=3D"padding: 10px; text-align: center; color: rgb(153, 15=
+3, 153); font-size: 10px; border-top-color: rgb(221, 221, 221); border-top-=
+width: 1px; border-top-style: solid;">
+            <p>This email is confidential. If you are not the intended reci=
+pient, please delete it immediately.</p>
+        </div>
+    </div>
+
+
+</body></html>
