@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTL1 - Threat Intelligence (Interactive Guide)</title>
+    <!-- استدعاء خط Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* الألوان الرئيسية من شعار شبكة آباد */
+        :root {
+            --bg-color: #f4f7f6;
+            --nav-bg: #ffffff;
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+            --text-muted: #555555;
+            --primary-blue: #164f86; /* أزرق آباد */
+            --primary-blue-light: #226baf;
+            --accent-orange: #f59b23; /* ذهبي/برتقالي آباد */
+            --border: #e0e6ed;
+            --shadow: rgba(22, 79, 134, 0.08);
+        }
+
+        html {
+            scroll-behavior: smooth; /* للتنقل الناعم بين الأقسام */
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+
+        /* شريط التنقل العلوي */
+        .main-nav {
+            background-color: var(--nav-bg);
+            border-bottom: 4px solid var(--primary-blue);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 40px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 12px var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .logo-container img {
+            max-height: 60px;
+            object-fit: contain;
+            transition: transform 0.3s;
+        }
+
+        .logo-container img:hover {
+            transform: scale(1.05);
+        }
+
+        .lang-btn {
+            background-color: var(--accent-orange);
+            color: #fff;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(245, 155, 35, 0.3);
+        }
+
+        .lang-btn:hover {
+            background-color: #df8818;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(245, 155, 35, 0.4);
+        }
+
+        /* الترويسة */
+        header {
+            text-align: center;
+            padding: 150px 20px 60px;
+            background: linear-gradient(135deg, #ffffff 0%, var(--bg-color) 100%);
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 200px;
+            height: 200px;
+            background: var(--accent-orange);
+            opacity: 0.05;
+            border-radius: 50%;
+        }
+
+        header h1 {
+            color: var(--primary-blue);
+            margin: 0;
+            font-size: 2.8rem;
+            font-weight: 900;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        header p {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin: 15px auto 0;
+        }
+
+        /* الحاوية الرئيسية */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* القائمة التفاعلية (Sticky Menu) */
+        .interactive-menu {
+            position: sticky;
+            top: 85px; /* أسفل شريط التنقل العلوي */
+            background-color: var(--nav-bg);
+            padding: 15px 20px;
+            margin: -20px auto 40px auto;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px var(--shadow);
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            z-index: 999;
+            border: 1px solid var(--border);
+        }
+
+        .interactive-menu a {
+            text-decoration: none;
+            color: var(--primary-blue);
+            font-weight: 700;
+            padding: 10px 20px;
+            border-radius: 8px;
+            background-color: #f0f4f8;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            border: 1px solid transparent;
+        }
+
+        .interactive-menu a:hover {
+            background-color: var(--primary-blue);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(22, 79, 134, 0.2);
+        }
+
+        /* تنسيق الأقسام والبطاقات */
+        .section-wrapper {
+            margin-bottom: 60px;
+            scroll-margin-top: 160px; /* لضبط التمرير مع القائمة الثابتة */
+        }
+
+        .section-header {
+            background: linear-gradient(90deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
+            color: white;
+            padding: 18px 30px;
+            border-radius: 12px 12px 0 0;
+            font-size: 1.6rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 10px var(--shadow);
+        }
+
+        .section-header::before {
+            content: '📌';
+            margin-inline-end: 10px;
+            font-size: 1.4rem;
+        }
+
+        .module {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            padding: 40px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.03);
+            transition: all 0.3s ease;
+        }
+
+        .module:hover {
+            box-shadow: 0 12px 35px var(--shadow);
+        }
+
+        .topic-title {
+            color: var(--primary-blue);
+            font-size: 1.4rem;
+            font-weight: 900;
+            border-bottom: 2px dashed var(--accent-orange);
+            padding-bottom: 8px;
+            margin-top: 35px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .topic-title::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 24px;
+            background-color: var(--accent-orange);
+            margin-inline-end: 12px;
+            border-radius: 4px;
+        }
+
+        .topic-title:first-child {
+            margin-top: 0;
+        }
+
+        ul {
+            padding-inline-start: 25px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        li::marker {
+            color: var(--accent-orange);
+            font-weight: bold;
+        }
+
+        strong {
+            color: var(--primary-blue);
+            font-weight: 700;
+            background-color: rgba(22, 79, 134, 0.05);
+            padding: 0 4px;
+            border-radius: 4px;
+        }
+
+        /* فئات تبديل اللغة */
+        .en-content { display: none; }
+        .ar-content { display: block; }
+        
+        body.en-mode .en-content { display: block; }
+        body.en-mode .ar-content { display: none; }
+
+        body.en-mode {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+        
+        /* التوافق مع الهواتف */
+        @media (max-width: 768px) {
+            .interactive-menu {
+                flex-direction: column;
+                text-align: center;
+                padding: 10px;
+            }
+            header {
+                padding: 120px 15px 40px;
+            }
+            .module {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- شريط التنقل العلوي -->
+    <nav class="main-nav">
+        <div class="logo-container">
+            <img src="logo.jpg" alt="Abad Network">
+        </div>
+        <button class="lang-btn" onclick="toggleLanguage()">
+            <span class="ar-content">English 🇬🇧</span>
+            <span class="en-content">عربي 🇸🇦</span>
+        </button>
+    </nav>
+
+    <!-- الترويسة -->
+    <header>
+        <h1 class="ar-content">استخبارات التهديدات (Threat Intelligence)</h1>
+        <h1 class="en-content">Threat Intelligence (Domain 3)</h1>
+    </header>
+
+    <div class="container">
+        
+        <!-- القائمة التفاعلية (Menu) -->
+        <nav class="interactive-menu">
+            <a href="#sec1">
+                <span class="ar-content">1. المقدمة وأنواع الاستخبارات</span>
+                <span class="en-content">1. Intro & Types</span>
+            </a>
+            <a href="#sec2">
+                <span class="ar-content">2. جهات التهديد (APTs)</span>
+                <span class="en-content">2. Threat Actors & APTs</span>
+            </a>
+            <a href="#sec3">
+                <span class="ar-content">3. الاستخبارات التشغيلية وأطر العمل</span>
+                <span class="en-content">3. Operational Intel & Frameworks</span>
+            </a>
+            <a href="#sec4">
+                <span class="ar-content">4. الاستخبارات التكتيكية</span>
+                <span class="en-content">4. Tactical Intel</span>
+            </a>
+            <a href="#sec5">
+                <span class="ar-content">5. الاستخبارات الاستراتيجية</span>
+                <span class="en-content">5. Strategic Intel</span>
+            </a>
+        </nav>
+
+        <!-- القسم الأول -->
+        <div id="sec1" class="section-wrapper">
+            <div class="section-header ar-content">القسم الأول: مقدمة في استخبارات التهديدات </div>
+            <div class="section-header en-content">Section 1: Introduction to Threat Intelligence </div>
+            <div class="module">
+                <div class="ar-content">
+                    <div class="topic-title">1. مقدمة في استخبارات التهديدات</div>
+                    <p>مرحباً بك في مجال استخبارات التهديدات في Blue Team Level 1! يغطي هذا المجال كل شيء بدءاً من الجهات الخبيثة إلى مؤشرات الاختراق، ومن حملات البرمجيات الخبيثة العالمية إلى مشاركة المعلومات. الأهداف التعليمية تشمل فهم سبب استخدام استخبارات التهديدات، التمييز بين أنواع الاستخبارات (التشغيلية، التكتيكية، الاستراتيجية)، وإجراء أبحاث OSINT لجمع المعلومات.</p>
+
+                    <div class="topic-title">2. شرح استخبارات التهديدات ودورة حياتها</div>
+                    <p>استخبارات التهديدات (TI) هي معلومات تم جمعها من مصادر متعددة حول الجهات الخبيثة وأنشطتها. وتتكون دورة حياتها من 6 مراحل أساسية:</p>
+                    <ul>
+                        <li><strong>التخطيط والتوجيه (Planning & Direction):</strong> تحديد الأهداف لبرنامج الاستخبارات.</li>
+                        <li><strong>الجمع (Collection):</strong> جمع البيانات الخام من مصادر مختلفة (OSINT، تغذيات تجارية، سجلات داخلية).</li>
+                        <li><strong>المعالجة (Processing):</strong> فرز وتنظيم البيانات المجمعة.</li>
+                        <li><strong>التحليل (Analysis):</strong> فحص البيانات المعالجة لتحديد الأنماط واستخراج رؤى قابلة للتنفيذ.</li>
+                        <li><strong>النشر (Dissemination):</strong> مشاركة الاستخبارات الجاهزة مع الجهات المعنية (مثل محللي SOC).</li>
+                        <li><strong>التغذية الراجعة (Feedback):</strong> تلقي الملاحظات لتحسين الدورات المستقبلية.</li>
+                    </ul>
+
+                    <div class="topic-title">3. أنواع الاستخبارات العامة</div>
+                    <ul>
+                        <li><strong>SIGINT (استخبارات الإشارات):</strong> اعتراض الإشارات الراديوية والاتصالات.</li>
+                        <li><strong>OSINT (الاستخبارات مفتوحة المصدر):</strong> جمع المعلومات من المصادر العامة المتاحة على الإنترنت.</li>
+                        <li><strong>HUMINT (الاستخبارات البشرية):</strong> تُجمع من المصادر البشرية عبر التجسس أو الاستجواب.</li>
+                        <li><strong>GEOINT (الاستخبارات الجغرافية المكانية):</strong> استغلال وتحليل الصور والمعلومات المكانية (مثل صور الأقمار الصناعية).</li>
+                    </ul>
+
+                    <div class="topic-title">4. أنواع استخبارات التهديدات السيبرانية</div>
+                    <ul>
+                        <li><strong>الاستراتيجية (Strategic):</strong> معلومات عالية المستوى غير تقنية للإدارة لاتخاذ قرارات الميزانية والسياسات.</li>
+                        <li><strong>التشغيلية (Operational):</strong> تركز على دراسة المهاجمين، دوافعهم، وسلوكياتهم (TTPs). تتطلب تدخلاً بشرياً للتحليل والتتبع.</li>
+                        <li><strong>التكتيكية (Tactical):</strong> معلومات فنية ذات قيمة فورية، مثل مؤشرات الاختراق (IOCs) وتُستخدم للحظر المباشر أو فحوصات التعرض.</li>
+                    </ul>
+
+                    <div class="topic-title">5. لماذا تعتبر استخبارات التهديدات مفيدة؟</div>
+                    <p>توفر الاستخبارات <strong>سياق التهديد السيبراني</strong> لفهم من يهاجم ولماذا، وتساعد في <strong>تحديد أولويات الحوادث</strong> للتركيز على التنبيهات الأكثر خطورة. كما تساهم في <strong>إثراء التحقيق</strong> ببيانات إضافية، وتعزز <strong>مشاركة المعلومات</strong> بين المؤسسات لمنع الهجمات بشكل استباقي.</p>
+
+                    <div class="topic-title">6. مستقبل استخبارات التهديدات (CVEs & CVSS)</div>
+                    <p>الثغرات والمخاطر الشائعة (CVE) هي قائمة بالثغرات المكتشفة علناً، ويُقيّم نظام (CVSS) خطورتها من 0 إلى 10. يعتمد المستقبل على <strong>الترتيب التنبؤي (Predictive Prioritization)</strong>؛ أي التركيز على الثغرات التي يتم استغلالها فعلياً في الواقع بدلاً من الاعتماد فقط على درجة CVSS العالية.</p>
+                </div>
+                <div class="en-content">
+                    <div class="topic-title">1. Section Introduction, Threat Intelligence</div>
+                    <p>Welcome to the Threat Intelligence domain of Blue Team Level 1! This domain covers everything from malicious actors to indicators of compromise, global malware campaigns to information sharing. Learning objectives include understanding why TI is used, differentiating between strategic, operational, and tactical intelligence, and conducting OSINT research.</p>
+
+                    <div class="topic-title">2. Threat Intelligence Explained & Lifecycle</div>
+                    <p>Threat Intelligence (TI) is information gathered from a range of sources about malicious actors and their activities. The intelligence lifecycle consists of 6 phases:</p>
+                    <ul>
+                        <li><strong>Planning & Direction:</strong> Setting the goals and objectives.</li>
+                        <li><strong>Collection:</strong> Gathering raw data from various sources.</li>
+                        <li><strong>Processing:</strong> Sorting, organizing, and normalizing data.</li>
+                        <li><strong>Analysis:</strong> Examining data to identify patterns and actionable insights.</li>
+                        <li><strong>Dissemination:</strong> Sharing finished intelligence with stakeholders.</li>
+                        <li><strong>Feedback:</strong> Receiving input to improve future cycles.</li>
+                    </ul>
+
+                    <div class="topic-title">3. Types of Intelligence</div>
+                    <ul>
+                        <li><strong>SIGINT (Signals Intelligence):</strong> Interception of radio signals and communications.</li>
+                        <li><strong>OSINT (Open-Source Intelligence):</strong> Information gathered from publicly available sources.</li>
+                        <li><strong>HUMINT (Human Intelligence):</strong> Gathered from human sources through interpersonal contact or espionage.</li>
+                        <li><strong>GEOINT (Geospatial Intelligence):</strong> Derived from the exploitation of imagery and geospatial information.</li>
+                    </ul>
+
+                    <div class="topic-title">4. Types of Threat Intelligence</div>
+                    <ul>
+                        <li><strong>Strategic Threat Intelligence:</strong> High-level, non-technical information for decision-makers and executives.</li>
+                        <li><strong>Operational Threat Intelligence:</strong> Focuses on studying threat actors, their motivations, and TTPs. Requires human analysis.</li>
+                        <li><strong>Tactical Threat Intelligence:</strong> Technical intelligence of immediate value, typically shared as Indicators of Compromise (IOCs).</li>
+                    </ul>
+
+                    <div class="topic-title">5. Why Threat Intelligence Can be Useful</div>
+                    <p>TI provides <strong>Cyber Threat Context</strong> to understand who is attacking, aids in <strong>Incident Prioritization</strong> to focus on high-risk alerts, enables <strong>Investigation Enrichment</strong>, and fosters <strong>Information Sharing</strong> between organizations to proactively stop attacks.</p>
+
+                    <div class="topic-title">6. The Future of Threat Intelligence</div>
+                    <p>CVE (Common Vulnerabilities and Exposures) lists publicly disclosed vulnerabilities, scored by CVSS (0-10). The future relies on <strong>Predictive Prioritization</strong>: understanding which vulnerabilities are actively being exploited in the wild rather than just patching based solely on high CVSS scores.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- القسم الثاني -->
+        <div id="sec2" class="section-wrapper">
+            <div class="section-header ar-content">القسم الثاني: جهات التهديد والمجموعات المتقدمة </div>
+            <div class="section-header en-content">Section 2: Threat Actors and APTs </div>
+            <div class="module">
+                <div class="ar-content">
+                    <div class="topic-title">9 & 10. مقدمة جهات التهديد وتصنيفاتهم</div>
+                    <p>التهديد هو أي حدث يُحتمل أن يؤثر سلباً على عمليات المؤسسة. جهة التهديد (Threat Actor) هي الكيان المسؤول عن هذا الحادث. يُصنف المهاجمون إلى:</p>
+                    <ul>
+                        <li><strong>مجرمو الإنترنت (Cyber Criminals):</strong> دافعهم مالي بحت (مثل مشغلي برمجيات الفدية).</li>
+                        <li><strong>الدول القومية (Nation-State/APTs):</strong> مجموعات ترعاها حكومات للتجسس، التخريب، أو سرقة الملكية الفكرية. تمتلك موارد ضخمة.</li>
+                        <li><strong>نشطاء الاختراق (Hacktivism):</strong> قراصنة دافعهم سياسي أو أيديولوجي (تشويه المواقع، هجمات حجب الخدمة DDoS).</li>
+                        <li><strong>التهديد الداخلي (Insider Threat):</strong> موظفون أو شركاء يمتلكون وصولاً للشبكة من الداخل (سواء بقصد أو بدون قصد).</li>
+                    </ul>
+
+                    <div class="topic-title">11. الدوافع (Motivations)</div>
+                    <p>فهم دوافع المهاجمين يساعد المدافعين على توقع التهديدات. الدوافع تشمل: مالية (ربح مادي)، سياسية (أهداف جيوسياسية وتجسس)، اجتماعية (البحث عن الشهرة أو الانتقام)، ودوافع مجهولة (حيث يظل الهدف غير واضح في بداية التحقيق).</p>
+
+                    <div class="topic-title">12. اصطلاحات التسمية (Actor Naming Conventions)</div>
+                    <p>تستخدم شركات الأمن المختلفة اصطلاحات تسمية مميزة لتتبع المجموعات:</p>
+                    <ul>
+                        <li><strong>CrowdStrike:</strong> تستخدم أسماء الحيوانات. Bear (روسيا)، Panda (الصين)، Kitten (إيران)، Chollima (كوريا الشمالية)، Spider (الجرائم الإلكترونية).</li>
+                        <li><strong>Mandiant/FireEye:</strong> تستخدم الأرقام. <strong>APT</strong> متبوعاً برقم للدول القومية، <strong>FIN</strong> للمجموعات المالية، و <strong>UNC</strong> للمجموعات غير المصنفة.</li>
+                    </ul>
+
+                    <div class="topic-title">13. ما هي التهديدات المستمرة المتقدمة (APTs)؟</div>
+                    <p>مجموعات خفية وموجهة نحو أهداف محددة تمتلك تمويلاً هائلاً وصبراً طويلاً للبقاء دون اكتشاف. أمثلة واقعية: APT28 (روسيا)، Cobalt Group (استهداف القطاع المالي)، و APT32 (فيتنام).</p>
+
+                    <div class="topic-title">14. التكتيكات والتقنيات والإجراءات (TTPs)</div>
+                    <p>الـ TTPs تصف <em>كيف</em> يعمل المهاجمون. يعتمد المدافعون عليها لاصطياد التهديدات وبناء دفاعات استباقية. <strong>إطار عمل MITRE ATT&CK</strong> يرسم مئات التقنيات عبر مختلف التكتيكات (مثل الوصول الأولي، وتصعيد الصلاحيات).</p>
+                </div>
+                <div class="en-content">
+                    <div class="topic-title">9 & 10. Threat Actors Introduction & Categorization</div>
+                    <p>A threat is any circumstance with the potential to adversely impact operations. A threat actor is the entity responsible. They are categorized into:</p>
+                    <ul>
+                        <li><strong>Cyber Criminals:</strong> Motivated primarily by financial gain (e.g., ransomware operators).</li>
+                        <li><strong>Nation-State (APTs):</strong> Government-sponsored groups conducting espionage or sabotage. Highly resourced.</li>
+                        <li><strong>Hacktivism:</strong> Hackers driven by political or ideological motives (website defacement, DDoS).</li>
+                        <li><strong>Insider Threat:</strong> Current or former employees with inside access (malicious or accidental).</li>
+                    </ul>
+
+                    <div class="topic-title">11. Motivations</div>
+                    <p>Understanding motives helps anticipate threats. Common motivations include: Financial (monetary gain), Political (geopolitical goals, espionage), Social (notoriety, revenge), and Unknown (where the goal remains unclear during initial stages).</p>
+
+                    <div class="topic-title">12. Actor Naming Conventions</div>
+                    <p>Different security vendors use distinct naming conventions:</p>
+                    <ul>
+                        <li><strong>CrowdStrike:</strong> Uses animal-based cryptonyms. Bear (Russia), Panda (China), Kitten (Iran), Chollima (North Korea), Spider (Cybercrime).</li>
+                        <li><strong>Mandiant/FireEye:</strong> Uses numbered designations. <strong>APT</strong> for nation-states, <strong>FIN</strong> for financially motivated groups, and <strong>UNC</strong> for uncategorized.</li>
+                    </ul>
+
+                    <div class="topic-title">13. What Are APTs?</div>
+                    <p>Advanced Persistent Threats (APTs) are highly resourced, stealthy, and goal-oriented threat groups. Real-world examples include APT28 (Fancy Bear - Russia), Cobalt Group (Financial Cybercrime), and APT32 (OceanLotus - Vietnam).</p>
+
+                    <div class="topic-title">14. Tools, Techniques, Procedures (TTPs)</div>
+                    <p>TTPs describe <em>how</em> threat actors operate. Defenders use them to hunt for threats proactively. The <strong>MITRE ATT&CK Framework</strong> maps hundreds of adversary techniques across various tactics (e.g., Initial Access, Privilege Escalation).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- القسم الثالث -->
+        <div id="sec3" class="section-wrapper">
+            <div class="section-header ar-content">القسم الثالث: الاستخبارات التشغيلية وأطر العمل </div>
+            <div class="section-header en-content">Section 3: Operational Intelligence & Frameworks </div>
+            <div class="module">
+                <div class="ar-content">
+                    <div class="topic-title">17 & 18. الاستخبارات التشغيلية والمؤشرات الاستباقية (Precursors)</div>
+                    <p>تركز الاستخبارات التشغيلية على المهام اليومية لمحلل الاستخبارات وفهم أطر الهجوم. <strong>المؤشرات الاستباقية (Precursors)</strong> هي علامات تدل على هجوم مستقبلي محتمل، مثل مسح المنافذ (Port Scanning)، الهندسة الاجتماعية لجمع المعلومات، ونقاشات المخترقين على منتديات الويب المظلم.</p>
+
+                    <div class="topic-title">19. مؤشرات الاختراق (IOCs) وتنسيقاتها</div>
+                    <p>مؤشرات الاختراق هي أدلة جنائية تشير بقوة إلى وقوع اختراق للشبكة، مثل عناوين البريد الإلكتروني الخبيثة، عناوين IP، النطاقات، وقيم تجزئة الملفات (Hashes). التنسيقات القياسية لمشاركة هذه المؤشرات تشمل <strong>STIX</strong> (لغة الهيكلة) و <strong>TAXII</strong> (آلية النقل).</p>
+
+                    <div class="topic-title">20. إطار عمل MITRE ATT&CK</div>
+                    <p>قاعدة معرفية عالمية لسلوكيات الخصوم مبنية على هجمات العالم الحقيقي. يفضل المحترفون استخدامه لأنه يقدم تفاصيل دقيقة (على شكل مصفوفة) للتقنيات المستخدمة في كل مرحلة، مما يسهل بناء ومقارنة الدفاعات بشكل عملي.</p>
+
+                    <div class="topic-title">21. سلسلة القتل السيبراني (Lockheed Martin Cyber Kill Chain)</div>
+                    <p>إطار عمل يتكون من 7 مراحل تصف تسلسل الهجوم:</p>
+                    <ul>
+                        <li>الاستطلاع (Reconnaissance)</li>
+                        <li>التسليح (Weaponization)</li>
+                        <li>التسليم (Delivery)</li>
+                        <li>الاستغلال (Exploitation)</li>
+                        <li>التثبيت (Installation)</li>
+                        <li>التحكم والسيطرة (Command and Control - C2)</li>
+                        <li>تنفيذ الأهداف (Actions on Objectives)</li>
+                    </ul>
+
+                    <div class="topic-title">22. تحديد هوية المهاجم (Attribution) وقيوده</div>
+                    <p>ينقسم تحديد الهوية إلى: نسبة للآلة (الجهاز المستخدم)، نسبة بشرية (الشخص المنفذ)، ونسبة للمسؤول الفعلي (الجهة الموجهة للهجوم). <strong>القيود:</strong> تحديد الهوية صعب جداً لأن المهاجمين يستخدمون التمويه، شبكات TOR، والأعلام الكاذبة (False Flags).</p>
+
+                    <div class="topic-title">23. هرم الألم (Pyramid of Pain)</div>
+                    <p>يوضح مستوى الصعوبة الذي يواجهه المهاجم عندما تحظر مؤشراته. حظر <strong>قيم التجزئة (Hashes)</strong> أو <strong>الـ IPs</strong> هو أمر (تافه أو سهل) للمهاجم لتجاوزه. بينما حظر <strong>الآثار والأدوات</strong> هو أمر (مزعج أو صعب). وفي قمة الهرم يقع حظر <strong>السلوكيات (TTPs)</strong>، وهو أمر (شديد الصعوبة) يجبر المهاجم على تغيير منهجية عمله بالكامل.</p>
+                </div>
+                <div class="en-content">
+                    <div class="topic-title">17 & 18. Operational Intelligence & Precursors</div>
+                    <p>Operational intelligence focuses on the daily tasks of a Threat Intel Analyst and understanding attack frameworks. <strong>Precursors</strong> are signs that an attack may happen in the future, such as Port Scanning & Fingerprinting, Social Engineering reconnaissance, and discussions on OSINT bulletin boards or dark web forums.</p>
+
+                    <div class="topic-title">19. Indicators of Compromise (IOCs) Explained</div>
+                    <p>IOCs are forensic artifacts that strongly suggest a network intrusion has occurred (e.g., Malicious Emails, IP Addresses, Domain Names, File Hashes). Standard formats for sharing IOCs include <strong>STIX</strong> (the structured language) and <strong>TAXII</strong> (the transport mechanism).</p>
+
+                    <div class="topic-title">20. MITRE ATT&CK Framework</div>
+                    <p>A globally accessible knowledge base of adversary tactics and techniques based on real-world observations. It provides a granular, matrix-based view of the specific techniques used at any stage, making it highly practical for mapping defenses.</p>
+
+                    <div class="topic-title">21. Lockheed Martin Cyber Kill Chain</div>
+                    <p>A framework developed to outline the 7 sequential phases of a cyberattack:</p>
+                    <ul>
+                        <li>Reconnaissance</li>
+                        <li>Weaponization</li>
+                        <li>Delivery</li>
+                        <li>Exploitation</li>
+                        <li>Installation</li>
+                        <li>Command and Control (C2)</li>
+                        <li>Actions on Objectives</li>
+                    </ul>
+
+                    <div class="topic-title">22. Attribution and its Limitations</div>
+                    <p>Attribution involves Machine Attribution (identifying the device), Human Attribution (the person), and Ultimately Responsible Attribution (the funding organization/nation-state). <strong>Limitations:</strong> It is extremely difficult due to attackers leveraging False Flags, TOR networks, and proxies.</p>
+
+                    <div class="topic-title">23. Pyramid of Pain</div>
+                    <p>A visual representation showing the level of difficulty an attacker faces when defenders block specific indicators. Blocking <strong>Hash Values</strong> or <strong>IPs</strong> is Trivial/Easy for attackers to bypass. Blocking <strong>Artifacts or Tools</strong> is Annoying/Challenging. Blocking <strong>TTPs</strong> at the peak is Tough, forcing attackers to completely relearn their methodology.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- القسم الرابع -->
+        <div id="sec4" class="section-wrapper">
+            <div class="section-header ar-content">القسم الرابع: الاستخبارات التكتيكية </div>
+            <div class="section-header en-content">Section 4: Tactical Intelligence </div>
+            <div class="module">
+                <div class="ar-content">
+                    <div class="topic-title">25 & 26. الاستخبارات التكتيكية وفحوصات التعرض (Threat Exposure Checks)</div>
+                    <p>تركز الاستخبارات التكتيكية على التنفيذ المباشر. <strong>فحوصات التعرض (TEC)</strong> هي عملية يقوم فيها المحلل بالبحث النشط في سجلات المؤسسة (SIEM أو EDR) للتحقق مما إذا كانت مؤشرات الاختراق (IOCs) المستلمة حديثاً من مصادر التهديد قد شُوهدت مسبقاً في الشبكة (كإجراء فحص تاريخي لآخر 7 أيام لعنوان IP مشبوه).</p>
+
+                    <div class="topic-title">27. قوائم المراقبة (Watchlists / IOC Monitoring)</div>
+                    <p>لأتمتة العمل وتقليل الجهد اليدوي، يتم إدراج مؤشرات الاختراق في <strong>قوائم مراقبة دائمة</strong> داخل الـ SIEM، والتي تقوم بتوليد تنبيهات أمنية فورية (Alerts) بمجرد رصد أي اتصال أو نشاط يطابق هذه المؤشرات الخبيثة.</p>
+
+                    <div class="topic-title">28. فحوصات التعرض العام (Public Exposure Checks)</div>
+                    <p>تحليل المعلومات المتاحة علناً عن المؤسسة وموظفيها والتي يمكن للمهاجمين استغلالها، ويشمل:</p>
+                    <ul>
+                        <li>مراقبة الشبكات الاجتماعية لتجنب الهندسة الاجتماعية.</li>
+                        <li>استخراج <strong>البيانات الوصفية (Image Metadata)</strong> من الصور لكشف الموقع ونوع الجهاز.</li>
+                        <li>رصد <strong>المعلومات المسربة</strong> في خلفيات الصور (كلمات المرور المكتوبة).</li>
+                        <li>اكتشاف <strong>انتحال العلامة التجارية (Brand Abuse)</strong>.</li>
+                        <li>البحث في <strong>تسريبات البيانات (Data Breach Dumps)</strong> عن بيانات اعتماد الموظفين في الويب المظلم.</li>
+                    </ul>
+
+                    <div class="topic-title">29. منصات استخبارات التهديدات (TIPs)</div>
+                    <p>أنظمة برمجية مركزية تُستخدم لتجميع، دمج، وتحليل بيانات التهديدات من مصادر متعددة (مفتوحة وتجارية). هذه المنصات تقوم بأتمتة إرسال المؤشرات (IOCs) مباشرة إلى أجهزة الحماية الأمنية كجدران الحماية. أمثلة: ThreatConnect, Anomali, ThreatQ, و MISP.</p>
+
+                    <div class="topic-title">30 & 31. منصة (MISP) ونشرها</div>
+                    <p>منصة <strong>MISP (Malware Information Sharing Platform)</strong> هي الأداة المجانية ومفتوحة المصدر الأشهر عالمياً لتخزين ومشاركة المؤشرات (IOCs). تقوم بربط العلاقات بين الحملات الخبيثة بشكل آلي وتصدير قواعد الكشف (Rules) إلى أنظمة كشف التسلل (NIDS) والـ SIEM.</p>
+                </div>
+                <div class="en-content">
+                    <div class="topic-title">25 & 26. Tactical Intelligence & Threat Exposure Checks</div>
+                    <p>Tactical intelligence is highly actionable. A <strong>Threat Exposure Check (TEC)</strong> is when an analyst actively searches internal logs (using SIEM/EDR) to see if newly received IOCs from intelligence feeds have been observed historically in their network (e.g., checking logs for the past 7 days against a malicious IP).</p>
+
+                    <div class="topic-title">27. Watchlists / IOC Monitoring</div>
+                    <p>To automate detection, analysts create <strong>Watchlists</strong> within the SIEM or EDR platform. These lists continuously monitor network traffic for known malicious IPs or domains, generating immediate automated alerts upon a match, freeing up analyst time.</p>
+
+                    <div class="topic-title">28. Public Exposure Checks Explained</div>
+                    <p>Analyzing publicly available information about the organization and its employees that could be leveraged by attackers. This includes:</p>
+                    <ul>
+                        <li>Social Media Monitoring to identify social engineering targets.</li>
+                        <li>Extracting hidden <strong>Image Metadata (EXIF data)</strong>.</li>
+                        <li>Spotting <strong>Leaked Information</strong> in office photos (sticky notes).</li>
+                        <li>Detecting <strong>Brand Abuse and Impersonation</strong>.</li>
+                        <li>Searching <strong>Data Breach Dumps</strong> on the dark web for compromised employee credentials.</li>
+                    </ul>
+
+                    <div class="topic-title">29. Threat Intelligence Platforms (TIPs)</div>
+                    <p>Centralized software solutions used to aggregate, correlate, and analyze threat data from multiple feeds. They automate the distribution of IOCs directly to security controls like firewalls. Examples include ThreatConnect, Anomali, ThreatQ, and MISP.</p>
+
+                    <div class="topic-title">30 & 31. Malware Information Sharing Platform (MISP)</div>
+                    <p><strong>MISP</strong> is a highly popular, open-source platform used globally for storing and sharing threat intelligence and IOCs. It automatically correlates relationships between malware campaigns and exports detection rules directly to NIDS (like Snort) and SIEM systems.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- القسم الخامس -->
+        <div id="sec5" class="section-wrapper">
+            <div class="section-header ar-content">القسم الخامس: الاستخبارات الاستراتيجية </div>
+            <div class="section-header en-content">Section 5: Strategic Intelligence </div>
+            <div class="module">
+                <div class="ar-content">
+                    <div class="topic-title">35 & 36. الاستخبارات الاستراتيجية ومشاركة المعلومات (ISACs)</div>
+                    <p>تركز الاستخبارات الاستراتيجية على الصورة الكبرى والدوافع الجيوسياسية للدول المعادية والـ APTs. تتشارك المؤسسات المعلومات عبر الانضمام إلى <strong>مراكز مشاركة وتحليل المعلومات (ISACs)</strong>. هذه المراكز تكون مخصصة لصناعة معينة (مثل قطاع الطيران a-isac)، فإذا تعرضت مؤسسة لهجوم، تقوم بمشاركة المؤشرات لحماية بقية أعضاء القطاع.</p>
+
+                    <div class="topic-title">37. تجميع وتوزيع المؤشرات (IOC/TTP Gathering)</div>
+                    <p>يتلقى المحلل الاستراتيجي تحذيرات وتنبيهات مستمرة من شركاء الـ ISAC أو الجهات الحكومية (مثل US-CERT). يقوم المحلل بتمرير هذه المؤشرات إلى المحلل التكتيكي لتنفيذ "فحوصات التعرض" (TECs)، ويقوم بتمرير التحذيرات الاستراتيجية (Situational Awareness) لباقي فريق الـ SOC.</p>
+
+                    <div class="topic-title">38. المصادر المفتوحة (OSINT) مقابل المصادر المدفوعة</div>
+                    <ul>
+                        <li><strong>المصادر المفتوحة (OSINT):</strong> خيار ممتاز ومجاني لبناء قدرات استخبارات التهديدات. تتطلب جهداً للتحقق من مصداقيتها. أمثلة: VirusTotal, URLhaus, OTX AlienVault.</li>
+                        <li><strong>المصادر المدفوعة:</strong> تستخدمها المؤسسات الكبرى، توفر بيانات دقيقة مخصصة للقطاعات وتُدمج مباشرة في الأنظمة. أمثلة: FireEye, Recorded Future, CrowdStrike.</li>
+                    </ul>
+
+                    <div class="topic-title">39. بروتوكول إشارة المرور (Traffic Light Protocol - TLP)</div>
+                    <p>مجموعة من التصنيفات لضمان مشاركة المعلومات الحساسة مع الجمهور المناسب فقط:</p>
+                    <ul>
+                        <li><strong>TLP:CLEAR:</strong> معلومات خالية من المخاطر ويمكن نشرها للعامة.</li>
+                        <li><strong>TLP:GREEN:</strong> معلومات مفيدة للتوعية داخل المجتمع المشارك فقط، يمنع نشرها للعامة.</li>
+                        <li><strong>TLP:AMBER:</strong> مقيدة بالمؤسسة والعملاء المشتركين بناءً على مبدأ "الحاجة للمعرفة".</li>
+                        <li><strong>TLP:AMBER+STRICT:</strong> مشاركة مقتصرة بصرامة على داخل المؤسسة فقط.</li>
+                        <li><strong>TLP:RED:</strong> سرية للغاية ومخصصة لأعين المستلمين الأفراد المحددين فقط.</li>
+                    </ul>
+
+                    <div class="topic-title">40. بروتوكول الإجراءات المسموحة (Permissible Action Protocol - PAP)</div>
+                    <p>يُصنف هذا البروتوكول الإجراءات المسموح باتخاذها بناءً على مدى خطورة كشف التحقيق للجهة المهاجمة:</p>
+                    <ul>
+                        <li><strong>PAP:CLEAR:</strong> إجراءات غير مقيدة.</li>
+                        <li><strong>PAP:GREEN:</strong> إجراءات تحكم غير تطفلية (مثل حظر IP في جدار الحماية).</li>
+                        <li><strong>PAP:AMBER:</strong> التعامل السلبي مع البيانات لضمان بقاء الإجراءات غير مكتشفة من المهاجم.</li>
+                        <li><strong>PAP:RED:</strong> مقيدة ببيئات الفحص المعزولة (Non-production environments) لضمان عدم لفت انتباه المهاجم بأي شكل.</li>
+                    </ul>
+                </div>
+                <div class="en-content">
+                    <div class="topic-title">35 & 36. Strategic Intelligence & Information Sharing (ISACs)</div>
+                    <p>Strategic analysts focus on the big picture, geopolitical activity, and APT tracking. Organizations share actionable intelligence by joining <strong>Information Sharing and Analysis Centers (ISACs)</strong>. These are typically industry-specific (e.g., Aviation ISAC). If one member suffers an attack, they share IOCs to help other members proactively defend themselves.</p>
+
+                    <div class="topic-title">37. IOC/TTP Gathering and Distribution</div>
+                    <p>Strategic analysts regularly receive government-issued alerts (e.g., US-CERT) and ISAC partner reports. They pass the IOCs down to tactical analysts to perform Threat Exposure Checks (TECs) in the SIEM, and provide high-level situational awareness to the wider security operations team.</p>
+
+                    <div class="topic-title">38. OSINT vs Paid-for Sources</div>
+                    <ul>
+                        <li><strong>Open-Source Intelligence (OSINT):</strong> Great, free way to build TI capability, though info needs to be verified. Examples: VirusTotal, URLhaus, OTX AlienVault.</li>
+                        <li><strong>Paid-For Intelligence:</strong> Used by large enterprises. Provides dedicated, tailored threat feeds. Providers include FireEye, Recorded Future, CrowdStrike.</li>
+                    </ul>
+
+                    <div class="topic-title">39. Traffic Light Protocol (TLP)</div>
+                    <p>A set of designations to ensure sensitive information is shared with the appropriate audience:</p>
+                    <ul>
+                        <li><strong>TLP:CLEAR:</strong> Minimal risk; can be freely shared publicly.</li>
+                        <li><strong>TLP:GREEN:</strong> For awareness within the participating community. Not for public release.</li>
+                        <li><strong>TLP:AMBER:</strong> Shared on a strict need-to-know basis within the organization and clients.</li>
+                        <li><strong>TLP:AMBER+STRICT:</strong> Restricts sharing strictly to the organization only.</li>
+                        <li><strong>TLP:RED:</strong> Highly restricted; for the eyes and ears of individual recipients only.</li>
+                    </ul>
+
+                    <div class="topic-title">40. Permissible Action Protocol (PAP)</div>
+                    <p>PAP classifies actions based on the potential exposure of sensitive data to malicious entities:</p>
+                    <ul>
+                        <li><strong>PAP:CLEAR:</strong> Actions are relatively unrestricted.</li>
+                        <li><strong>PAP:GREEN:</strong> Permits controlled, non-intrusive actions (e.g., blocking inbound threats at the firewall).</li>
+                        <li><strong>PAP:AMBER:</strong> Confined to passive data handling to ensure actions remain undetected by malicious sources.</li>
+                        <li><strong>PAP:RED:</strong> Exclusively for internal detection and investigation in non-production environments to avoid tipping off the adversary.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- سكربت التبديل التفاعلي -->
+    <script>
+        function toggleLanguage() {
+            const body = document.body;
+            const htmlRoot = document.getElementById('html-root');
+            
+            body.classList.toggle('en-mode');
+            
+            if (body.classList.contains('en-mode')) {
+                htmlRoot.setAttribute('dir', 'ltr');
+                htmlRoot.setAttribute('lang', 'en');
+            } else {
+                htmlRoot.setAttribute('dir', 'rtl');
+                htmlRoot.setAttribute('lang', 'ar');
+            }
+        }
+    </script>
+</body>
+</html>
