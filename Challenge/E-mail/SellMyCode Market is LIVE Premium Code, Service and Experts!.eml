@@ -1,0 +1,374 @@
+Delivered-To: itc.sec2016@gmail.com
+Received: by 2002:a05:640c:a8c:b0:270:272:76d8 with SMTP id j12csp2424133eir;
+        Mon, 20 Jul 2026 18:04:43 -0700 (PDT)
+X-Received: by 2002:a05:6000:4a08:b0:47f:5289:d5e2 with SMTP id ffacd0b85a97d-47f62320806mr17912483f8f.40.1784595883611;
+        Mon, 20 Jul 2026 18:04:43 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1784595883; cv=none;
+        d=google.com; s=arc-20260327;
+        b=ILFGEVkFPghMkrH0vfYNPj/D40TEQMrc6Il26QiG2UDiiRcmwTJDQGHd6c9/vyBGHh
+         wp31EvttlRQnRFvmTZezoJcj/5qscQQkOZ0guYRCFUulVIONeaa2id7vI/zgoy+Fjy/F
+         zHc+g4hXx46ImtosIli9q/u9XdiuhjQpRTDEV7FLUwuGalELnV/OAYwJ8IMGgmiAYhe0
+         KNODqTlTwJOJplPPBwubyxjCcFFQkOevF4bgQz7P3CdPzQQ6fDZmTzWvqj9mw4l+oGql
+         cXSRL5LIi0GsmWiZn7vsQSevKNOqXLeXeZxXuqO8TyEXQ79eZfSDZxbG4Th/grJu400r
+         7dmg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=feedback-id:from:list-unsubscribe-post:date:subject:to:message-id
+         :content-transfer-encoding:list-unsubscribe:mime-version
+         :dkim-signature:dkim-signature;
+        bh=pPIIRb139u9PjsF0KGlbqKjgWBt9hvann0VFNA7TmLw=;
+        fh=2ZR3qdReOZhpvBqh6CIPPAEqLdhYkWNtMvgNYlYXMQY=;
+        b=OyRDBGTqPMorwH+em0M28VBOq6NpHrJOTmA9d7NtgHApj6dGmUeihwDyfHMukijCCD
+         /H6xJNElIZfpPKUjpXqcAPj2xOW6IoV9elllt2Oi0CLr1eZYh6nr8ydBLKHAIPSgwL4v
+         S346YxqnvdGR4JHgBXnaD17fmsETDYhoWMw3pB5wgsgUnigWceOj2q6qbNxav1Lwbpwe
+         q37t48RDpTptCVS1WUCkZT08Qq2ehRhjzuMEwEBJ0VbsJioIE881PEX29LCIvwnla4Xx
+         nTkgGfb3mLrlGi5EkMl2rVeAyRaynzXsKT3/mWfnCGAuK+E/Tb1C3FLJsHBwORPAwB2L
+         8kgQ==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@wolfmarket.net header.s=6i4yuyh37q65n43w72zti5qaua7vdxv6 header.b=duHjXpHu;
+       dkim=pass header.i=@amazonses.com header.s=shh3fegwg5fppqsuzphvschd53n6ihuv header.b=HkZQGzdT;
+       spf=pass (google.com: domain of 0102019f823424f7-b60f585c-3f41-48ae-9581-5c1a3a0fdaa6-000000@bounce.wolfmarket.net designates 54.240.4.9 as permitted sender) smtp.mailfrom=0102019f823424f7-b60f585c-3f41-48ae-9581-5c1a3a0fdaa6-000000@bounce.wolfmarket.net;
+       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=wolfmarket.net
+Return-Path: <0102019f823424f7-b60f585c-3f41-48ae-9581-5c1a3a0fdaa6-000000@bounce.wolfmarket.net>
+Received: from a4-9.smtp-out.eu-west-1.amazonses.com (a4-9.smtp-out.eu-west-1.amazonses.com. [54.240.4.9])
+        by mx.google.com with ESMTPS id ffacd0b85a97d-47f63eb13c6si21263300f8f.273.2026.07.20.18.04.43
+        for <itc.sec2016@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 20 Jul 2026 18:04:43 -0700 (PDT)
+Received-SPF: pass (google.com: domain of 0102019f823424f7-b60f585c-3f41-48ae-9581-5c1a3a0fdaa6-000000@bounce.wolfmarket.net designates 54.240.4.9 as permitted sender) client-ip=54.240.4.9;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@wolfmarket.net header.s=6i4yuyh37q65n43w72zti5qaua7vdxv6 header.b=duHjXpHu;
+       dkim=pass header.i=@amazonses.com header.s=shh3fegwg5fppqsuzphvschd53n6ihuv header.b=HkZQGzdT;
+       spf=pass (google.com: domain of 0102019f823424f7-b60f585c-3f41-48ae-9581-5c1a3a0fdaa6-000000@bounce.wolfmarket.net designates 54.240.4.9 as permitted sender) smtp.mailfrom=0102019f823424f7-b60f585c-3f41-48ae-9581-5c1a3a0fdaa6-000000@bounce.wolfmarket.net;
+       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=wolfmarket.net
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+	s=6i4yuyh37q65n43w72zti5qaua7vdxv6; d=wolfmarket.net; t=1784595883;
+	h=Mime-Version:List-Unsubscribe:Content-Type:Content-Transfer-Encoding:Message-Id:To:Subject:Date:List-Unsubscribe-Post:From;
+	bh=eqFzzoNWS2SAvIsG6im660txgoiKOT/LIX5thVGlcao=;
+	b=duHjXpHuZK4+vZqG+JyjIVS54VAiF0zgw4KFcpPYa+5ZwmtI2o0nAEtq/tX9MLLx
+	Z8yUJWBzmuSgMui8awR8+2+YjnCvYpXH+QNpXc9+oLq+lYSOcSEUwEZSSfDrlvUgOUb
+	RQ97FGdIsr9tuv8NAzTU57Cb1dtK0ArNbUZ1ErOPyN3ffRR+nEwLPjdGjMcwrPmKepy
+	4xCSZQ26WujFC3y4H2/xzDS37tfvyUQOzeKj04VdXn04fncXreZqKxNJyV/QbbBotPx
+	OS62YtosD1U2W/zzuhLthrPiJQVicUEjH8OVJuatcpBttj306u7lHpoMNRkkabS8tRQ
+	/EK9cHxiBQ==
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+	s=shh3fegwg5fppqsuzphvschd53n6ihuv; d=amazonses.com; t=1784595883;
+	h=Mime-Version:List-Unsubscribe:Content-Type:Content-Transfer-Encoding:Message-Id:To:Subject:Date:List-Unsubscribe-Post:From:Feedback-ID;
+	bh=eqFzzoNWS2SAvIsG6im660txgoiKOT/LIX5thVGlcao=;
+	b=HkZQGzdTdHmp3oY/SD7DIW31dC72SyTLcdzwfsMx4HMOc2TaD8fwbiUtWLzNI2e0
+	Apwvtq4C93lLIbj1wQ0SrZ1JbCg8HlL7qX6u7/mHYzjm4Ct2FLnmh+/cxANxbbabWZP
+	mqKG9vGZ/FoR+4sK/VndlLdaLWzBBL7/QYVNlE74=
+Mime-Version: 1.0
+X-Listmonk-Subscriber: 359f880f-1db8-4de4-ba07-10353371ce43
+List-Unsubscribe: <https://email.wolfmarket.net/subscription/63c645fe-580b-4c89-bf42-08b0f5124953/359f880f-1db8-4de4-ba07-10353371ce43>
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Message-ID: <0102019f823424f7-b60f585c-3f41-48ae-9581-5c1a3a0fdaa6-000000@eu-west-1.amazonses.com>
+To: itc.sec2016@gmail.com
+Subject: SellMyCode Market is LIVE  Premium Code, Service and Experts!
+Date: Tue, 21 Jul 2026 01:04:43 +0000
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+X-Listmonk-Campaign: 63c645fe-580b-4c89-bf42-08b0f5124953
+From: SellMyCode <hello@wolfmarket.net>
+Feedback-ID: ::1.eu-west-1.yRa4nAyTKeRTRs8skfbI55s2/Iz8Y9xCTyMrQkbIess=:AmazonSES
+X-SES-Outgoing: 2026.07.21-54.240.4.9
+
+<!doctype html>
+<html lang=3D"en" xmlns=3D"http://www.w3.org/1999/xhtml" xmlns:v=3D"urn:sch=
+emas-microsoft-com:vml" xmlns:o=3D"urn:schemas-microsoft-com:office:office"=
+>
+<head>
+<meta charset=3D"utf-8">
+<meta name=3D"viewport" content=3D"width=3Ddevice-width, initial-scale=3D1"=
+>
+<meta http-equiv=3D"X-UA-Compatible" content=3D"IE=3Dedge">
+<meta name=3D"color-scheme" content=3D"light">
+<meta name=3D"supported-color-schemes" content=3D"light">
+<title>SellMyCode is live</title>
+
+<style>
+  body { margin: 0; padding: 0; background-color: #f2f5f2; -webkit-text-siz=
+e-adjust: 100%; }
+  table { border-collapse: collapse; }
+  img { border: 0; line-height: 100%; }
+  a { color: #0e5a3c; }
+  @media only screen and (max-width: 620px) {
+    .sc-wrap { width: 100% !important; }
+    .sc-px { padding-left: 22px !important; padding-right: 22px !important;=
+ }
+    .sc-hero-h1 { font-size: 27px !important; line-height: 34px !important;=
+ }
+  }
+</style>
+</head>
+<body style=3D"margin:0;padding:0;background-color:#f2f5f2;">
+
+<div style=3D"display:none;max-height:0;overflow:hidden;mso-hide:all;">
+  Premium scripts, themes, courses and expert services =E2=80=94 quality-ch=
+ecked, from real developers. Come take a look around.&nbsp;&nbsp;&nbsp;&nbs=
+p;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&=
+nbsp;&nbsp;&nbsp;&nbsp;
+</div>
+
+<table role=3D"presentation" border=3D"0" width=3D"100%" cellpadding=3D"0" =
+cellspacing=3D"0" style=3D"border:0;background-color:#f2f5f2;">
+<tr><td align=3D"center" style=3D"border:0;padding:28px 12px;">
+
+  <table role=3D"presentation" border=3D"0" class=3D"sc-wrap" width=3D"600"=
+ cellpadding=3D"0" cellspacing=3D"0" style=3D"border:0;width:600px;max-widt=
+h:600px;">
+
+    <tr>
+      <td style=3D"border:0;background-color:#0e1a14;border-radius:18px 18p=
+x 0 0;">
+        <table style=3D"border:0;" role=3D"presentation" border=3D"0" width=
+=3D"100%" cellpadding=3D"0" cellspacing=3D"0">
+          <tr>
+            <td align=3D"center" style=3D"border:0;padding:38px 48px 0;">
+              <a href=3D"https://email.wolfmarket.net/link/d7f14e22-4b5b-47=
+ee-810c-e93bcc7ea442/63c645fe-580b-4c89-bf42-08b0f5124953/00000000-0000-000=
+0-0000-000000000000" target=3D"_blank" style=3D"text-decoration:none;">
+                <img src=3D"https://sellmycode.net/themes/sellmycode/images=
+/logo-dark.png" width=3D"240" alt=3D"SellMyCode" style=3D"display:block;wid=
+th:240px;height:auto;">
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td class=3D"sc-px" align=3D"center" style=3D"border:0;padding:=
+30px 48px 14px;">
+              <span style=3D"font-family:Consolas,Menlo,'Courier New',monos=
+pace;font-size:12px;letter-spacing:3px;color:#e6a92e;text-transform:upperca=
+se;">The den is open</span>
+            </td>
+          </tr>
+          <tr>
+            <td class=3D"sc-px" align=3D"center" style=3D"border:0;padding:=
+0 48px;">
+              <h1 class=3D"sc-hero-h1" style=3D"margin:10px 0 0;font-family=
+:Poppins,-apple-system,'Segoe UI',Arial,sans-serif;font-weight:700;font-siz=
+e:34px;line-height:42px;color:#f4faf6;">
+                SellMyCode is <span style=3D"color:#25c281;">live</span>.
+              </h1>
+            </td>
+          </tr>
+          <tr>
+            <td class=3D"sc-px" align=3D"center" style=3D"border:0;padding:=
+16px 48px 8px;">
+              <p style=3D"margin:0;font-family:-apple-system,'Segoe UI',Ari=
+al,sans-serif;font-size:15.5px;line-height:24px;color:#a9c6b7;">
+                A marketplace for premium code =E2=80=94 scripts, themes an=
+d plugins from the sharpest developers, every item reviewed before it goes =
+on sale. Plus courses to level you up and vetted experts you can hire.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td align=3D"center" style=3D"border:0;padding:12px 48px 6px;">
+              <span style=3D"font-family:Consolas,Menlo,'Courier New',monos=
+pace;font-size:12.5px;letter-spacing:2px;color:#7fa892;">YOUR CODE =E2=80=
+=94 YOUR CASH</span>
+            </td>
+          </tr>
+          <tr>
+            <td align=3D"center" style=3D"border:0;padding:24px 48px 44px;"=
+>
+              <table style=3D"border:0;" role=3D"presentation" border=3D"0"=
+ cellpadding=3D"0" cellspacing=3D"0">
+                <tr>
+                  <td align=3D"center" bgcolor=3D"#25c281" style=3D"border:=
+0;border-radius:999px;">
+                    <a href=3D"https://email.wolfmarket.net/link/d7f14e22-4=
+b5b-47ee-810c-e93bcc7ea442/63c645fe-580b-4c89-bf42-08b0f5124953/00000000-00=
+00-0000-0000-000000000000" target=3D"_blank"
+                       style=3D"display:inline-block;padding:14px 38px;font=
+-family:-apple-system,'Segoe UI',Arial,sans-serif;font-size:15px;font-weigh=
+t:700;color:#0b1710;text-decoration:none;border-radius:999px;">
+                      Explore the marketplace&nbsp;&rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr>
+      <td style=3D"border:0;background-color:#ffffff;">
+        <table style=3D"border:0;" role=3D"presentation" border=3D"0" width=
+=3D"100%" cellpadding=3D"0" cellspacing=3D"0">
+          <tr>
+            <td class=3D"sc-px" style=3D"border:0;padding:36px 48px 8px;">
+              <h2 style=3D"margin:0;font-family:Poppins,-apple-system,'Sego=
+e UI',Arial,sans-serif;font-weight:700;font-size:20px;color:#0d1a13;">What'=
+s inside</h2>
+            </td>
+          </tr>
+
+          <tr><td class=3D"sc-px" style=3D"border:0;padding:18px 48px 0;">
+            <table style=3D"border:0;" role=3D"presentation" border=3D"0" w=
+idth=3D"100%" cellpadding=3D"0" cellspacing=3D"0">
+              <tr>
+                <td width=3D"14" valign=3D"top" style=3D"border:0;padding-t=
+op:7px;"><div style=3D"width:9px;height:9px;background-color:#25c281;border=
+-radius:2px;font-size:0;line-height:0;">&nbsp;</div></td>
+                <td style=3D"border:0;padding-left:12px;font-family:-apple-=
+system,'Segoe UI',Arial,sans-serif;">
+                  <span style=3D"font-size:15px;font-weight:700;color:#0d1a=
+13;">Premium scripts, themes &amp; plugins</span><br>
+                  <span style=3D"font-size:13.5px;line-height:21px;color:#5=
+c6f64;">PHP, WordPress, HTML, mobile and more =E2=80=94 each item is qualit=
+y-checked by our team before it goes live.</span>
+                </td>
+              </tr>
+            </table>
+          </td></tr>
+
+          <tr><td class=3D"sc-px" style=3D"border:0;padding:16px 48px 0;">
+            <table style=3D"border:0;" role=3D"presentation" border=3D"0" w=
+idth=3D"100%" cellpadding=3D"0" cellspacing=3D"0">
+              <tr>
+                <td width=3D"14" valign=3D"top" style=3D"border:0;padding-t=
+op:7px;"><div style=3D"width:9px;height:9px;background-color:#e6a92e;border=
+-radius:2px;font-size:0;line-height:0;">&nbsp;</div></td>
+                <td style=3D"border:0;padding-left:12px;font-family:-apple-=
+system,'Segoe UI',Arial,sans-serif;">
+                  <span style=3D"font-size:15px;font-weight:700;color:#0d1a=
+13;">New freebies every week</span><br>
+                  <span style=3D"font-size:13.5px;line-height:21px;color:#5=
+c6f64;">A rotating selection of full items you can download at no cost =E2=
+=80=94 no catch, just a good way to try us out.</span>
+                </td>
+              </tr>
+            </table>
+          </td></tr>
+
+          <tr><td class=3D"sc-px" style=3D"border:0;padding:16px 48px 0;">
+            <table style=3D"border:0;" role=3D"presentation" border=3D"0" w=
+idth=3D"100%" cellpadding=3D"0" cellspacing=3D"0">
+              <tr>
+                <td width=3D"14" valign=3D"top" style=3D"border:0;padding-t=
+op:7px;"><div style=3D"width:9px;height:9px;background-color:#25c281;border=
+-radius:2px;font-size:0;line-height:0;">&nbsp;</div></td>
+                <td style=3D"border:0;padding-left:12px;font-family:-apple-=
+system,'Segoe UI',Arial,sans-serif;">
+                  <span style=3D"font-size:15px;font-weight:700;color:#0d1a=
+13;">Courses by working developers</span><br>
+                  <span style=3D"font-size:13.5px;line-height:21px;color:#5=
+c6f64;">Hands-on video courses with quizzes and certificates =E2=80=94 lear=
+n it, then ship it.</span>
+                </td>
+              </tr>
+            </table>
+          </td></tr>
+
+          <tr><td class=3D"sc-px" style=3D"border:0;padding:16px 48px 0;">
+            <table style=3D"border:0;" role=3D"presentation" border=3D"0" w=
+idth=3D"100%" cellpadding=3D"0" cellspacing=3D"0">
+              <tr>
+                <td width=3D"14" valign=3D"top" style=3D"border:0;padding-t=
+op:7px;"><div style=3D"width:9px;height:9px;background-color:#e6a92e;border=
+-radius:2px;font-size:0;line-height:0;">&nbsp;</div></td>
+                <td style=3D"border:0;padding-left:12px;font-family:-apple-=
+system,'Segoe UI',Arial,sans-serif;">
+                  <span style=3D"font-size:15px;font-weight:700;color:#0d1a=
+13;">Hire a vetted expert</span><br>
+                  <span style=3D"font-size:13.5px;line-height:21px;color:#5=
+c6f64;">Installation, customization, speed optimization =E2=80=94 skip ahea=
+d and have it done for you.</span>
+                </td>
+              </tr>
+            </table>
+          </td></tr>
+
+          <tr>
+            <td class=3D"sc-px" style=3D"border:0;padding:30px 48px 8px;">
+              <table style=3D"border:0;" role=3D"presentation" border=3D"0"=
+ width=3D"100%" cellpadding=3D"0" cellspacing=3D"0">
+                <tr><td style=3D"border:0;border-top:1px solid #e8eee9;font=
+-size:0;line-height:0;">&nbsp;</td></tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td class=3D"sc-px" style=3D"border:0;padding:8px 48px 12px;">
+              <p style=3D"margin:0;font-family:-apple-system,'Segoe UI',Ari=
+al,sans-serif;font-size:14px;line-height:22px;color:#41544a;">
+                <strong style=3D"color:#0d1a13;">Are you a developer?</stro=
+ng> Open a free author account, publish your work and keep the lion's share=
+ of every sale =E2=80=94 with coupons, bundles and your own storefront to g=
+row it.
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td class=3D"sc-px" style=3D"border:0;padding:4px 48px 38px;">
+              <a href=3D"https://email.wolfmarket.net/link/02edd543-d0d9-43=
+3c-a99f-363e3bff2c60/63c645fe-580b-4c89-bf42-08b0f5124953/00000000-0000-000=
+0-0000-000000000000" target=3D"_blank" style=3D"font-family:-apple-system,'=
+Segoe UI',Arial,sans-serif;font-size:14px;font-weight:700;color:#0e5a3c;tex=
+t-decoration:underline;">Start selling on SellMyCode</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr>
+      <td style=3D"border:0;background-color:#0e1a14;border-radius:0 0 18px=
+ 18px;">
+        <table style=3D"border:0;" role=3D"presentation" border=3D"0" width=
+=3D"100%" cellpadding=3D"0" cellspacing=3D"0">
+          <tr>
+            <td class=3D"sc-px" align=3D"center" style=3D"border:0;padding:=
+22px 48px;">
+              <p style=3D"margin:0;font-family:-apple-system,'Segoe UI',Ari=
+al,sans-serif;font-size:12.5px;line-height:20px;color:#7fa892;">
+                SellMyCode is part of the <a href=3D"https://email.wolfmark=
+et.net/link/6226c153-a0a2-4480-b9d8-4d085a0ac415/63c645fe-580b-4c89-bf42-08=
+b0f5124953/00000000-0000-0000-0000-000000000000" target=3D"_blank" style=3D=
+"color:#e6a92e;text-decoration:none;font-weight:700;">WolfMarket</a> networ=
+k.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr>
+      <td align=3D"center" style=3D"border:0;padding:26px 20px 10px;">
+        <p style=3D"margin:0;font-family:-apple-system,'Segoe UI',Arial,san=
+s-serif;font-size:12px;line-height:19px;color:#8b9a90;">
+          You're receiving this because you have an account with us or join=
+ed our list at sellmycode.net.
+        </p>
+        <p style=3D"margin:8px 0 0;font-family:-apple-system,'Segoe UI',Ari=
+al,sans-serif;font-size:12px;line-height:19px;color:#8b9a90;">
+          <a href=3D"https://email.wolfmarket.net/subscription/63c645fe-580=
+b-4c89-bf42-08b0f5124953/359f880f-1db8-4de4-ba07-10353371ce43" style=3D"col=
+or:#8b9a90;text-decoration:underline;">Unsubscribe</a>
+          &nbsp;=C2=B7&nbsp;
+          <a href=3D"https://email.wolfmarket.net/link/d7f14e22-4b5b-47ee-8=
+10c-e93bcc7ea442/63c645fe-580b-4c89-bf42-08b0f5124953/00000000-0000-0000-00=
+00-000000000000" style=3D"color:#8b9a90;text-decoration:underline;">sellmyc=
+ode.net</a>
+        </p>
+        <p style=3D"margin:10px 0 0;font-family:-apple-system,'Segoe UI',Ar=
+ial,sans-serif;font-size:11.5px;line-height:18px;color:#a7b3aa;">
+          &copy; 2026 SellMyCode =C2=B7 WolfMarket
+        </p>
+      </td>
+    </tr>
+
+  </table>
+
+</td></tr>
+</table>
+
+</body>
+</html>
