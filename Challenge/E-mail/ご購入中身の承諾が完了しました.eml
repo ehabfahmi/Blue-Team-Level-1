@@ -1,0 +1,217 @@
+Return-Path: <noaclu@noaclu.26ouguanfree.com>
+Delivered-To: info@egsrc.com
+Received: from res327.servconfig.com
+	by res327.servconfig.com with LMTP
+	id SpJAA8BGsmpA8SQAZ2SsZw
+	(envelope-from <noaclu@noaclu.26ouguanfree.com>)
+	for <info@egsrc.com>; Tue, 22 Sep 2026 02:13:36 -0700
+Return-path: <noaclu@noaclu.26ouguanfree.com>
+Envelope-to: info@egsrc.com
+Delivery-date: Tue, 22 Sep 2026 02:13:36 -0700
+Received: from noaclu.26ouguanfree.com ([34.154.219.0]:35880)
+	by res327.servconfig.com with esmtps  (TLS1.3) tls TLS_AES_256_GCM_SHA384
+	(Exim 4.100)
+	(envelope-from <noaclu@noaclu.26ouguanfree.com>)
+	id 1x8wZC-0000000A9nC-2Zh3
+	for info@egsrc.com;
+	Tue, 22 Sep 2026 02:13:35 -0700
+DKIM-Signature: a=rsa-sha256; bh=tCQk6hBMit1fAEhdVOsslsjTqgD6eiefIZrR6syKQ3M=;
+ c=relaxed/relaxed; d=noaclu.26ouguanfree.com;
+ h=From:To:Subject:Date:Message-ID:MIME-Version:Content-Type:Received:List-ID:List-Unsubscribe-Post:List-Unsubscribe:Feedback-ID;
+ s=noaclu; t=1790068412; v=1;
+ b=Xt6uV7atDzZoj2wJ5b/VzATde0X5MepyX34t71cngUOSHbGks475pu69aQyUrSLcGrdYRrQt
+ dZ8PskgQApeZWY1vNCLXWw9YoH1DJQn25booh16B5zIjhljan7UfLOMtlCa96+2JDbS4Y1k8u0R
+ TOZMHbWG12L7uhl9LKMVRaTXOAaxQUQcCC26WG72GzXP9KS4bOannSz8JtiAe4V0QL6ogKlT6wI
+ RC19U63Akc+FXznrZhQ3M1Si/A+utNBml8RJj5dt7ywV7PgY3dRnhbGgwAqBNvvCXSUxfNkUVix
+ a1x/OqmiJCUR9Sf7qE9vSWSldSYeCpKM0UW56xCtf3/AQ==
+Mime-Version: 1.0
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Received: from [172.16.59.155] (c-69-180-235-219.hsd1.ga.comcast.net [69.180.235.219]) by noaclu.26ouguanfree.com (Postfix) with ESMTPSA id 0148D6B0D35 for <info@egsrc.com>; Tue, 22 Sep 2026 18:13:32 +0900 (JST)
+From: =?iso-2022-jp?b?GyRCJSslOSU/JV4hPCU1JV0hPCVIGyhC?= <info@noaclu.26ouguanfree.com>
+To: info@egsrc.com
+Subject: =?iso-2022-jp?b?GyRCJDQ5WEZ+Q2Y/SCROPjVCeiQsNDBOOyQ3JF4kNyQ/GyhC?=
+Date: Tue, 22 Sep 2026 18:13:22 +0900
+Message-ID: <179006840200.9752.194366929791422031@noaclu.26ouguanfree.com>
+List-ID: info <news.noaclu.26ouguanfree.com>
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+List-Unsubscribe: <https://noaclu.26ouguanfree.com/unsubscribe/f0mKmRF80aPRQ8g5lVv4a4>, <mailto:unsubscribe@noaclu.26ouguanfree.com>
+Feedback-ID: 48560412:0BhIwZ2xyX:amazon_noaclu.26ouguanfree.com:marketing
+X-Spam-Status: No, score=3.6
+X-Spam-Score: 36
+X-Spam-Bar: +++
+X-Ham-Report: Spam detection software, running on the system "res327.servconfig.com",
+ has NOT identified this incoming email as spam.  The original
+ message has been attached to this so you can view it or label
+ similar future email.  If you have any questions, see
+ root\@localhost for details.
+ Content preview:  __________ info _ 
+ Content analysis details:   (3.6 points, 5.0 required)
+  pts rule name              description
+ ---- ---------------------- --------------------------------------------------
+  1.9 URIBL_ABUSE_SURBL      Contains an URL listed in the ABUSE SURBL blocklist
+                             [URI: shijiedian.com]
+  0.0 URIBL_PH_SURBL         Contains an URL listed in the PH SURBL blocklist
+                             [URI: shijiedian.com]
+  0.0 URIBL_BLOCKED          ADMINISTRATOR NOTICE: The query to URIBL was blocked.
+                             See
+                             http://wiki.apache.org/spamassassin/DnsBlocklists#dnsbl-block
+                              for more information.
+                             [URI: shijiedian.com]
+                             [URI: 26ouguanfree.com]
+ -0.0 SPF_HELO_PASS          SPF: HELO matches SPF record
+ -0.0 SPF_PASS               SPF: sender matches SPF record
+ -0.1 DKIM_VALID_AU          Message has a valid DKIM or DK signature from author's
+                             domain
+  0.1 DKIM_SIGNED            Message has a DKIM or DK signature, not necessarily valid
+ -0.1 DKIM_VALID             Message has at least one valid DKIM or DK signature
+ -0.1 DKIM_VALID_EF          Message has a valid DKIM or DK signature from
+                             envelope-from domain
+  0.2 GB_SUBJ25              Subject with no Spaces
+  0.1 MIME_HTML_ONLY         BODY: Message only has text/html MIME parts
+  0.0 HTML_MESSAGE           BODY: HTML included in message
+  1.5 AMAZON_IMG_NOT_RCVD_AMZN Amazon hosted image but message not from
+                             Amazon
+X-Spam-Flag: NO
+
+<!DOCTYPE html><html lang=3D"ja"><head>
+<meta charset=3D"UTF-8"/>
+<meta name=3D"viewport" content=3D"width=3Ddevice-width, initial-scale=3D1.=
+0"/>
+<title>=E3=82=AA=E3=83=BC=E3=83=80=E3=83=BC=E3=82=92=E6=89=BF=E3=82=8A=E3=
+=81=BE=E3=81=97=E3=81=9F</title>
+</head>
+<body style=3D"margin:0;padding:0;background-color:#F3F3F3;font-family:Meir=
+yo,Hiragino Sans,Yu Gothic,sans-serif;-webkit-text-size-adjust:100%;-ms-tex=
+t-size-adjust:100%">
+<table cellpadding=3D"0" cellspacing=3D"0" role=3D"presentation" style=3D"w=
+idth:100%;max-width:600px;margin:0 auto;background-color:#FFFFFF;border-col=
+lapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt">
+  <tbody><tr>
+    <td style=3D"padding:24px 32px 16px 32px;background-color:#FFFFFF">
+      <img src=3D"https://m.media-amazon.com/images/G/01/authportal/tiv/ama=
+zon_logo_RGB._CB424887820_.png" width=3D"110" alt=3D"" style=3D"border:0;li=
+ne-height:100%;outline:none;text-decoration:none;-ms-interpolation-mode:bic=
+ubic"/>
+    </td>
+  </tr>
+  <tr>
+    <td style=3D"padding:0 32px;background-color:#FFFFFF">
+      <hr style=3D"border:none;border-top:1px solid #EAEAEA;margin:0"/>
+    </td>
+  </tr>
+  <tr>
+    <td style=3D"padding:20px 32px 0 32px;background-color:#FFFFFF">
+      <p style=3D"font-size:14px;line-height:1.7;color:#0F1111;margin:0 0 1=
+4px 0">info =E6=A7=98</p>
+      <p style=3D"font-size:14px;line-height:1.7;color:#0F1111;margin:0 0 1=
+4px 0">=E3=81=84=E3=81=A4=E3=82=82=E3=81=94=E5=88=A9=E7=94=A8=E3=81=84=E3=
+=81=9F=E3=81=A0=E3=81=8D=E3=80=81=E8=AA=A0=E3=81=AB=E3=81=82=E3=82=8A=E3=81=
+=8C=E3=81=A8=E3=81=86=E3=81=94=E3=81=96=E3=81=84=E3=81=BE=E3=81=99=E3=80=82=
+=E3=81=93=E3=81=AE=E3=81=9F=E3=81=B3=E3=81=AE=E3=81=8A=E7=94=B3=E3=81=97=E8=
+=BE=BC=E3=81=BF=E3=82=92=E6=89=BF=E3=82=8A=E3=81=BE=E3=81=97=E3=81=9F=E3=81=
+=93=E3=81=A8=E3=82=92=E3=81=94=E9=80=A3=E7=B5=A1=E7=94=B3=E3=81=97=E4=B8=8A=
+=E3=81=92=E3=81=BE=E3=81=99=E3=80=82</p>
+      <p style=3D"font-size:14px;line-height:1.7;color:#0F1111;margin:0 0 1=
+4px 0"><strong style=3D"color:#0F1111">=E3=81=94=E7=99=BA=E6=B3=A8=E6=A7=8B=
+=E6=88=90=E3=81=AF=E7=A2=BA=E3=81=8B=E3=81=AB=E5=AE=8C=E4=BA=86=E3=81=95=E3=
+=82=8C=E3=81=BE=E3=81=97=E3=81=9F</strong>=E3=80=82=E7=8F=BE=E5=9C=A8=E3=80=
+=81=E6=90=AC=E9=80=81=E3=81=AE=E6=BA=96=E5=82=99=E3=82=92=E9=80=B2=E3=82=81=
+=E3=81=A6=E3=81=8A=E3=82=8A=E3=81=BE=E3=81=99=E3=81=AE=E3=81=A7=E3=80=81=E5=
+=88=B0=E7=9D=80=E3=81=BE=E3=81=A7=E4=BB=8A=E3=81=97=E3=81=B0=E3=82=89=E3=81=
+=8F=E3=81=8A=E5=BE=85=E3=81=A1=E3=81=8F=E3=81=A0=E3=81=95=E3=81=84=E3=80=82=
+</p>
+      <p style=3D"font-size:14px;line-height:1.7;color:#0F1111;margin:0 0 1=
+4px 0">=E9=85=8D=E9=81=94=E3=81=AE=E9=80=B2=E8=A1=8C=E7=8A=B6=E6=B3=81=E3=
+=82=84=E5=95=86=E5=93=81=E3=81=AE=E7=8A=B6=E6=B3=81=E3=81=AF=E3=80=81=E4=B8=
+=8B=E8=A8=98=E3=81=AE=E7=A2=BA=E8=AA=8D=E7=94=BB=E9=9D=A2=E3=81=AB=E3=81=A6=
+=E9=9A=8F=E6=99=82=E3=81=94=E8=A6=A7=E3=81=84=E3=81=9F=E3=81=A0=E3=81=91=E3=
+=81=BE=E3=81=99=E3=80=82</p>
+    </td>
+  </tr>
+  <tr>
+    <td style=3D"padding:8px 32px;background-color:#FFFFFF">
+      <a href=3D"https://shijiedian.com" style=3D"display:inline-block;back=
+ground-color:#FFD814;color:#0F1111;text-decoration:none;font-size:14px;font=
+-weight:bold;padding:10px 40px;border-radius:24px;line-height:1.5">=E3=81=
+=94=E4=BE=9D=E9=A0=BC=E5=86=85=E5=AE=B9=E3=82=92=E7=A2=BA=E8=AA=8D=E3=81=99=
+=E3=82=8B</a>
+    </td>
+  </tr>
+  <tr>
+    <td style=3D"padding:8px 32px 16px 32px;background-color:#FFFFFF">
+      <table cellpadding=3D"0" cellspacing=3D"0" role=3D"presentation" styl=
+e=3D"width:100%;border-collapse:collapse;border-top:1px solid #EAEAEA;borde=
+r-bottom:1px solid #EAEAEA">
+        <tbody><tr>
+          <td style=3D"padding:16px 0">
+            <p style=3D"font-size:13px;line-height:1.7;color:#0F1111;margin=
+:0 0 4px 0">=E2=96=A0 =E7=99=BA=E9=80=81=E3=81=AE=E3=81=94=E6=A1=88=E5=86=
+=85</p>
+            <p style=3D"font-size:12px;line-height:1.7;color:#0F1111;margin=
+:0">=E3=83=BB =E3=81=94=E6=B3=A8=E6=96=87=E5=95=86=E5=93=81=E3=81=AF=E3=80=
+=81=E9=85=8D=E9=81=94=E5=85=88=E3=81=B8=E9=A0=86=E6=AC=A1=E3=81=8A=E9=80=81=
+=E3=82=8A=E3=81=84=E3=81=9F=E3=81=97=E3=81=BE=E3=81=99=E3=80=82</p>
+            <p style=3D"font-size:12px;line-height:1.7;color:#0F1111;margin=
+:0">=E3=83=BB =E9=85=8D=E9=80=81=E6=A5=AD=E8=80=85=E3=81=8C=E6=B1=BA=E3=81=
+=BE=E3=82=8A=E6=AC=A1=E7=AC=AC=E3=80=81=E8=A9=B3=E7=B4=B0=E3=82=92=E3=81=8A=
+=E7=9F=A5=E3=82=89=E3=81=9B=E3=81=84=E3=81=9F=E3=81=97=E3=81=BE=E3=81=99=E3=
+=80=82</p>
+            <p style=3D"font-size:12px;line-height:1.7;color:#0F1111;margin=
+:0">=E3=83=BB =E7=B4=8D=E5=93=81=E5=85=88=E3=81=A7=E3=81=AE=E5=8F=97=E5=8F=
+=96=E3=81=94=E5=B8=8C=E6=9C=9B=E3=81=8C=E3=81=82=E3=82=8B=E5=A0=B4=E5=90=88=
+=E3=81=AF=E3=80=81=E5=8F=97=E5=8F=96=E6=96=B9=E6=B3=95=E3=81=AE=E6=A1=88=E5=
+=86=85=E3=82=92=E3=81=94=E7=A2=BA=E8=AA=8D=E3=81=8F=E3=81=A0=E3=81=95=E3=81=
+=84=E3=80=82</p>
+          </td>
+        </tr>
+        <tr>
+          <td style=3D"padding:12px 0 16px 0;border-top:1px solid #EAEAEA">
+            <p style=3D"font-size:13px;line-height:1.7;color:#0F1111;margin=
+:0 0 4px 0">=E2=96=A0 =E3=81=8A=E5=95=8F=E3=81=84=E5=90=88=E3=82=8F=E3=81=
+=9B</p>
+            <p style=3D"font-size:12px;line-height:1.7;color:#0F1111;margin=
+:0">=E3=83=BB =E3=81=94=E4=B8=8D=E6=98=8E=E3=81=AA=E7=82=B9=E3=81=AF=E3=80=
+=81=E3=82=B5=E3=83=9D=E3=83=BC=E3=83=88=E3=81=BE=E3=81=A7=E3=81=8A=E5=95=8F=
+=E3=81=84=E5=90=88=E3=82=8F=E3=81=9B=E3=81=8F=E3=81=A0=E3=81=95=E3=81=84=E3=
+=80=82</p>
+            <p style=3D"font-size:12px;line-height:1.7;color:#0F1111;margin=
+:0">=E3=83=BB =E7=B4=8D=E5=93=81=E3=81=AB=E9=96=A2=E3=81=99=E3=82=8B=E3=81=
+=94=E7=9B=B8=E8=AB=87=E3=81=AF=E3=80=81=E3=81=8A=E6=B0=97=E8=BB=BD=E3=81=AB=
+=E3=81=94=E9=80=A3=E7=B5=A1=E3=81=8F=E3=81=A0=E3=81=95=E3=81=84=E3=80=82</p=
+>
+          </td>
+        </tr>
+      </tbody></table>
+    </td>
+  </tr>
+  <tr>
+    <td style=3D"padding:0 32px 24px 32px;background-color:#FFFFFF;font-siz=
+e:11px;color:#888888;line-height:1.6">
+      <p style=3D"font-size:11px;color:#888888;line-height:1.6;margin:0">=
+=E6=9C=AC=E3=83=A1=E3=83=BC=E3=83=AB=E3=81=AF=E3=80=81=E3=81=94=E7=99=BB=E9=
+=8C=B2=E3=81=84=E3=81=9F=E3=81=A0=E3=81=84=E3=81=9F=E3=81=8A=E5=AE=A2=E6=A7=
+=98=E5=AE=9B=E3=81=AB=E9=85=8D=E4=BF=A1=E3=81=97=E3=81=A6=E3=81=8A=E3=82=8A=
+=E3=81=BE=E3=81=99=E3=80=82</p>
+      <p style=3D"font-size:11px;color:#888888;line-height:1.6;margin:0">=
+=E6=9C=AC=E3=83=A1=E3=83=BC=E3=83=AB=E3=81=AB=E5=BF=83=E5=BD=93=E3=81=9F=E3=
+=82=8A=E3=81=AE=E3=81=AA=E3=81=84=E5=A0=B4=E5=90=88=E3=81=AF=E3=80=81=E6=9C=
+=AC=E3=83=A1=E3=83=BC=E3=83=AB=E3=82=92=E7=A0=B4=E6=A3=84=E3=81=97=E3=81=A6=
+=E3=81=84=E3=81=9F=E3=81=A0=E3=81=8D=E3=81=BE=E3=81=99=E3=82=88=E3=81=86=E3=
+=81=8A=E9=A1=98=E3=81=84=E3=81=84=E3=81=9F=E3=81=97=E3=81=BE=E3=81=99=E3=80=
+=82</p>
+      <p style=3D"font-size:11px;color:#888888;line-height:1.6;margin:0">=
+=E3=81=94=E4=B8=8D=E6=98=8E=E3=81=AA=E7=82=B9=E3=81=8C=E3=81=94=E3=81=96=E3=
+=81=84=E3=81=BE=E3=81=97=E3=81=9F=E3=82=89=E3=80=81=E3=82=B5=E3=83=9D=E3=83=
+=BC=E3=83=88=E3=81=BE=E3=81=A7=E3=81=8A=E5=95=8F=E3=81=84=E5=90=88=E3=82=8F=
+=E3=81=9B=E3=81=8F=E3=81=A0=E3=81=95=E3=81=84=E3=80=82</p>
+      <p style=3D"font-size:11px;color:#888888;line-height:1.6;margin:0">=
+=E3=81=84=E3=81=A4=E3=82=82=E3=81=94=E5=88=A9=E7=94=A8=E3=81=84=E3=81=9F=E3=
+=81=A0=E3=81=8D=E3=80=81=E8=AA=A0=E3=81=AB=E3=81=82=E3=82=8A=E3=81=8C=E3=81=
+=A8=E3=81=86=E3=81=94=E3=81=96=E3=81=84=E3=81=BE=E3=81=99=E3=80=82</p>
+    </td>
+  </tr>
+</tbody></table>
+
+</body></html>
+
