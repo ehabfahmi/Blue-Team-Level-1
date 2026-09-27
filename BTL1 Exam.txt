@@ -1,0 +1,45 @@
+ECG Domain Controller
+
+10.0.3.225
+
+Splunk Server
+
+10.0.11.59
+
+Scenario
+
+Hello SBT Managed Security Services team! We at ECorpGroup believe we've been breached by a team of hackers. One of our IT admins logged into the Domain Controller to find a badly drawn logo saying “you've been haxed”. At this time we're unsure who the actor is, how they got into our networks, and what actions they may have taken. One of our employees, Florence Nightingale, claims that she recently received an email from a legitimate company she has used before, but this time the PDF files wouldn't open properly. This might be a good place to start investigating.
+
+
+We are a new organization and have recently deployed Splunk log forwarders across all Windows hosts, in addition to log ingestion from our OpenVPN service, which authenticates to Active Directory hosted on our domain controller. We have had a few reports from a user, Florence, detailing that an occasional black window appears and disappears on her host. She also confirmed this is usually when she logs on at the start of a day and not as often outside of that.
+
+The specific network that was hit contains our primary domain controller and our corporate file server. Employees connect to this private network while working from home using OpenVPN. Note that the File Server system has been taken offline for containment, but you can still investigate using different sources, mentioned below.
+
+Our IT team have a limited security skillset but have provided you with the following:
+
+    DC1 (Windows Domain Controller)
+        Access to the DC via RDP (credentials below)
+    ECG-WKSTNA1028 (Remote Employee Workstation)
+        Full Disk Image
+    Florence Nightingale's emails, pre-loaded into eMClient software
+    Splunk access to review logs from any of the systems, including a simple pre-built dashboard
+    PCAPs for traffic between both inside and outside of the OpenVPN network
+
+You will be using the following tools during your investigation:
+
+    Wireshark - to analyze network traffic and connections
+    Autopsy - to analyze a hard drive image taken from patient zero
+    Splunk - to look at logs across all systems
+    EmClient - to review emails
+    DeepBlueCLI - for local log analysis
+
+A Senior Incident Responder is working with you on this incident. He has left notes for you in the different folders on your Desktop. Read them first!
+
+The following credentials will be useful:
+
+    RDP to Windows Domain Controller = SBT-Responder SBTResponder12!
+    Splunk = splunk blueteamlevel1
+
+Our cybersecurity team needs you to answer a number of questions about this incident so they can focus on remediation and reporting what happened to the Executives. Good luck.
+
+24 hours // submit // failed // feedback //
